@@ -1,0 +1,22 @@
+{
+"bite": "Bite",
+"together": "Together",
+"welcome": "Welcome to BiteTogether",
+"slogan": "Discover, share and connect",
+"through_food": "through food",
+"tapping_get_started": "By tapping Get Started, you agree to our",
+"privacy_policy": "Terms of Service and Privacy Policy.",
+"get_started": "Get Started",
+"next": "Next",
+"phone_number": "Phone number",
+"username": "Username",
+"enter_username": "Enter your username",
+"enter_phone": "Enter your phone number",
+"enter_otp": "Enter the OTP sent to",
+"username_helper_text": "6-20 characters, Letters, numbers, _ and . only",
+"otp_helper_text": "Didn't receive the code?",
+"resend": "Resend",
+"chat": "Chat",
+"search_by_username": "Search by username",
+"send_messages": "Send messages..."
+}

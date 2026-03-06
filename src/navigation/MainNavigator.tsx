@@ -1,24 +1,20 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-// import HomeScreen from '../screens/Feed/HomeScreen';
+import React from "react";
+import { createStackNavigator } from "@react-navigation/stack";
+import HomeScreen from "../screens/Feed/HomeScreen";
+import ChatScreen from "../screens/Chat/ChatScreen";
 // import SearchScreen from '../screens/Search/SearchScreen';
 // import FriendsScreen from '../screens/Friends/FriendsScreen';
 // import SavedScreen from '../screens/Saved/SavedScreen';
 // import RankingScreen from '../screens/Ranking/RankingScreen';
 // import ProfileScreen from '../screens/Profile/ProfileScreen';
 
-const Tab = createBottomTabNavigator();
+const Tab = createStackNavigator();
 
 export default function MainNavigator() {
   return (
-    // <Tab.Navigator>
-    //   <Tab.Screen name="Home" component={HomeScreen} />
-    //   <Tab.Screen name="Search" component={SearchScreen} />
-    //   <Tab.Screen name="Friends" component={FriendsScreen} />
-    //   <Tab.Screen name="Saved" component={SavedScreen} />
-    //   <Tab.Screen name="Ranking" component={RankingScreen} />
-    //   <Tab.Screen name="Profile" component={ProfileScreen} />
-    // </Tab.Navigator>
-    <></>
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Chat" component={ChatScreen} />
+    </Tab.Navigator>
   );
 }

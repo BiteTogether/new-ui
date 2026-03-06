@@ -1,0 +1,22 @@
+{
+"bite": "Bite",
+"together": "Together",
+"welcome": "Chào mừng đến với BiteTogether",
+"slogan": "Khám phá, chia sẻ và kết nối",
+"through_food": "qua ẩm thực",
+"tapping_get_started": "Bằng cách nhấn Bắt đầu, bạn đồng ý với",
+"privacy_policy": "Điều khoản Dịch vụ và Chính sách Bảo mật của chúng tôi.",
+"get_started": "Bắt đầu",
+"next": "Tiếp theo",
+"phone_number": "Số điện thoại",
+"username": "Tên người dùng",
+"enter_username": "Nhập tên người dùng của bạn",
+"enter_phone": "Nhập số điện thoại của bạn",
+"enter_otp": "Nhập mã OTP gửi đến",
+"username_helper_text": "6-20 ký tự, Chỉ bao gồm chữ cái, số, _ và .",
+"otp_helper_text": "Không nhận được mã?",
+"resend": "Gửi lại",
+"chat": "Trò chuyện",
+"search_by_username": "Tìm kiếm theo tên người dùng",
+"send_messages": "Gửi tin nhắn..."
+}
