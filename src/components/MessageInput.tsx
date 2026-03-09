@@ -3,10 +3,10 @@ import { View, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { colors, fonts } from "../utils/constants";
 import { Feather } from "@expo/vector-icons";
 
-type MessageInputProps = {
+interface MessageInputProps {
   placeholder?: string;
   type?: "chat";
-};
+}
 
 const MessageInput = ({ placeholder, type }: MessageInputProps) => {
   return (

@@ -3,10 +3,10 @@ import { View, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { colors, fonts } from "../utils/constants";
 import { Feather } from "@expo/vector-icons";
 
-type SearchBarProps = {
+interface SearchBarProps {
   placeholder?: string;
   type?: "chat";
-};
+}
 
 const SearchBar = ({ placeholder, type }: SearchBarProps) => {
   const handleSearch = () => {};

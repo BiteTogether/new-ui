@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 
-type AvatarProps = {
+interface AvatarProps {
   size?: number;
-};
+}
 
 const Avatar = ({ size = 50 }: AvatarProps) => {
   return (

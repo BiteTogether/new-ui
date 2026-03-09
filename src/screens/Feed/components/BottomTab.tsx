@@ -9,9 +9,9 @@ import ChatIcon from "../../../../assets/icons/ChatIcon";
 import Avatar from "../../../components/Avatar";
 import CameraIcon from "../../../../assets/icons/CameraIcon";
 
-type BottomTabProps = {
+interface BottomTabProps {
   onOpenChatList: () => void;
-};
+}
 
 const BottomTab = ({ onOpenChatList }: BottomTabProps) => {
   return (
@@ -48,7 +48,9 @@ const styles = StyleSheet.create({
     gap: 30,
     width: "80%",
     height: 60,
-    bottom: "8%",
+    bottom: "5%",
+    left: "10%",
+    right: "10%",
   },
 
   camera_button: {

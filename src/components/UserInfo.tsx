@@ -3,9 +3,9 @@ import { StyleSheet, TouchableOpacity, Text } from "react-native";
 import Avatar from "./Avatar";
 import { colors, fonts } from "../utils/constants";
 
-type UserInfoProps = {
+interface UserInfoProps {
   onPress?: () => void;
-};
+}
 
 const UserInfo = ({ onPress }: UserInfoProps) => {
   return (

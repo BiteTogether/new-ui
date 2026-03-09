@@ -1,9 +1,9 @@
 import React from "react";
 import Svg, { Path, Circle } from "react-native-svg";
 
-type IconProps = {
+interface IconProps {
   size?: number;
-};
+}
 
 const LogoIcon = ({ size = 24 }: IconProps) => {
   return (

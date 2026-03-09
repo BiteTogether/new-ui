@@ -2,10 +2,10 @@ import React from "react";
 import Svg, { Path, G, Defs, ClipPath, Rect } from "react-native-svg";
 import { colors } from "../../src/utils/constants";
 
-type IconProps = {
+interface IconProps {
   size?: number;
   color?: string;
-};
+}
 
 const ThreeDotsIcon = ({ size = 24, color = colors.text }: IconProps) => {
   return (

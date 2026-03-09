@@ -3,30 +3,30 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { colors, fonts } from "../../../utils/constants";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-type NavigationButtonProps = {
+interface NavigationButtonProps {
   onGoBack?: () => void;
   onGoNext?: () => void;
-};
+}
 
 const NavigationButton = ({ onGoBack, onGoNext }: NavigationButtonProps) => {
   const { t } = useTranslation();
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <TouchableOpacity onPress={onGoBack}>
         <Feather name="arrow-left" size={24} color={colors.text} />
       </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={onGoNext}>
         <Text style={styles.buttonText}>{t("next")}</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    top: "10%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -37,7 +37,8 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: colors.primary,
     borderRadius: 8,
-    padding: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
 
   buttonText: {

@@ -9,8 +9,9 @@ import { Feather } from "@expo/vector-icons";
 import UserInfo from "../../components/UserInfo";
 import ThreeDotsIcon from "../../../assets/icons/ThreeDotsIcon";
 import MessageInput from "../../components/MessageInput";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-type ChatScreenProps = {};
+interface ChatScreenProps {}
 
 const ChatScreen = () => {
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
@@ -21,7 +22,7 @@ const ChatScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.topbar_container}>
+      <SafeAreaView style={styles.topbar_container}>
         <View style={styles.user_container}>
           <TouchableOpacity onPress={handleGoBack}>
             <Feather name="arrow-left" size={24} color={colors.text} />
@@ -32,7 +33,7 @@ const ChatScreen = () => {
         <TouchableOpacity>
           <ThreeDotsIcon />
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
 
       <View style={styles.message_input_container}>
         <TouchableOpacity>
@@ -47,7 +48,7 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
+    paddingHorizontal: 24,
     backgroundColor: colors.background,
   },
 
@@ -61,7 +62,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: "10%",
   },
 
   message_input_container: {
