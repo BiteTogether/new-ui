@@ -18,5 +18,6 @@
 "resend": "Resend",
 "chat": "Chat",
 "search_by_username": "Search by username",
-"send_messages": "Send messages..."
+"send_messages": "Send messages...",
+"invalid_phone": "Invalid phone number. Please try again."
 }

@@ -18,5 +18,6 @@
 "resend": "Gửi lại",
 "chat": "Trò chuyện",
 "search_by_username": "Tìm kiếm theo tên người dùng",
-"send_messages": "Gửi tin nhắn..."
+"send_messages": "Gửi tin nhắn...",
+"invalid_phone": "Số điện thoại không hợp lệ. Vui lòng thử lại."
 }

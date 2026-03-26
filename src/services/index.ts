@@ -74,7 +74,7 @@ class ApiService {
   }
 
   private async clearTokens(): Promise<void> {
-    await AsyncStorage.removeMany([
+    await AsyncStorage.multiRemove([
       STORAGE_KEYS.ACCESS_TOKEN,
       STORAGE_KEYS.REFRESH_TOKEN,
     ]);
