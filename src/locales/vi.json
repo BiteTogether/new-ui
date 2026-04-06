@@ -13,11 +13,18 @@
 "enter_username": "Nhập tên người dùng của bạn",
 "enter_phone": "Nhập số điện thoại của bạn",
 "enter_otp": "Nhập mã OTP gửi đến",
-"username_helper_text": "6-20 ký tự, Chỉ bao gồm chữ cái, số, _ và .",
+"enter_info": "Nhập thông tin của bạn",
+"username_helper_text": "6-20 ký tự, chỉ bao gồm chữ cái, số, _ và .",
 "otp_helper_text": "Không nhận được mã?",
 "resend": "Gửi lại",
 "chat": "Trò chuyện",
 "search_by_username": "Tìm kiếm theo tên người dùng",
 "send_messages": "Gửi tin nhắn...",
-"invalid_phone": "Số điện thoại không hợp lệ. Vui lòng thử lại."
+"invalid_phone": "Số điện thoại không hợp lệ. Vui lòng thử lại.",
+"invalid_otp": "Mã OTP không hợp lệ. Vui lòng thử lại.",
+"invalid_username": "Tên người dùng không hợp lệ. Vui lòng thử lại.",
+"sending_otp": "Đang gửi OTP...",
+"full_name": "Họ và tên",
+"register_failed": "Đăng ký thất bại. Vui lòng thử lại.",
+"username_taken": "Tên người dùng đã tồn tại. Vui lòng chọn tên khác."
 }

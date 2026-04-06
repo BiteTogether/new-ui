@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { colors, fonts } from "../../utils/constants";
 import { useTranslation } from "react-i18next";
@@ -10,7 +10,6 @@ import LogoIcon from "../../../assets/icons/LogoIcon";
 const LoginScreen = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
-  const [phone, setPhone] = useState("");
 
   const handleLogin = () => {
     navigation.navigate("Input");

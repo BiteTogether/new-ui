@@ -1,43 +1,52 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import AuthNavigator from './AuthNavigator';
-import MainNavigator from './MainNavigator';
+import React, { useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+// Auth Screens
+import LoginScreen from "../screens/Authentication/LoginScreen";
+import InputScreen from "../screens/Authentication/InputScreen";
+import OTPScreen from "../screens/Authentication/OTPScreen";
+import RegisterScreen from "../screens/Authentication/RegisterScreen";
+// Main Screens
+import HomeScreen from "../screens/Feed/HomeScreen";
+import ChatScreen from "../screens/Chat/ChatScreen";
 
-const RootStack = createStackNavigator();
+import { useSelector, useDispatch } from "react-redux";
+import { loadToken } from "../store/auth/authSlice";
+import { AppDispatch, RootState } from "../store";
+import Loading from "../components/Loading";
+
+const Stack = createNativeStackNavigator();
 
 export default function Navigation() {
+  const { isSignedIn } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch<AppDispatch>();
+  const { loadingToken } = useSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    dispatch(loadToken());
+  }, []);
+
+  if (loadingToken) {
+    return <Loading />;
+  }
+
   return (
     <NavigationContainer>
-      <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        <RootStack.Screen name="Auth" component={AuthNavigator} />
-        <RootStack.Screen name="Main" component={MainNavigator} />
-      </RootStack.Navigator>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {isSignedIn ? (
+          <>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Chat" component={ChatScreen} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Input" component={InputScreen} />
+            <Stack.Screen name="OTP" component={OTPScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+          </>
+        )}
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-
-// import React from 'react';
-// import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-// import HomeScreen from '../screens/Feed/HomeScreen';
-// import SearchScreen from '../screens/Search/SearchScreen';
-// import FriendsScreen from '../screens/Friends/FriendsScreen';
-// import SavedScreen from '../screens/Saved/SavedScreen';
-// import RankingScreen from '../screens/Ranking/RankingScreen';
-// import ProfileScreen from '../screens/Profile/ProfileScreen';
-
-// const Tab = createBottomTabNavigator();
-
-// export default function MainNavigator() {
-//   return (
-//     <Tab.Navigator>
-//       <Tab.Screen name="Home" component={HomeScreen} />
-//       <Tab.Screen name="Search" component={SearchScreen} />
-//       <Tab.Screen name="Friends" component={FriendsScreen} />
-//       <Tab.Screen name="Saved" component={SavedScreen} />
-//       <Tab.Screen name="Ranking" component={RankingScreen} />
-//       <Tab.Screen name="Profile" component={ProfileScreen} />
-//     </Tab.Navigator>
-//   );
-// }

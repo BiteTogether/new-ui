@@ -1,31 +1,66 @@
-import React from "react";
-import { View, Text, StyleSheet, TextInput } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../types/navigations";
 import NavigationButton from "./components/NavigationButton";
 import { colors, fonts } from "../../utils/constants";
+import { PhoneInput, isValidNumber } from "react-native-phone-entry";
+import { CountryCode } from "react-native-country-picker-modal";
+import Toast from "react-native-toast-message";
 
 const InputScreen = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
+  const [countryCode, setCountryCode] = useState<CountryCode>("US");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
+
   const handleGoBack = () => {
     navigation.goBack();
   };
 
   const handleGoNext = () => {
-    navigation.navigate("OTP");
+    if (isValidNumber(phoneNumber, countryCode)) {
+      navigation.navigate("OTP", { phoneNumber });
+    } else {
+      Toast.show({
+        type: "error",
+        text1: t("invalid_phone"),
+      });
+    }
   };
+
   return (
     <View style={styles.container}>
-      <NavigationButton onGoBack={handleGoBack} onGoNext={handleGoNext} />
+      <NavigationButton
+        onGoBack={handleGoBack}
+        onGoNext={handleGoNext}
+        isDisabledNext={!phoneNumber}
+      />
       <Text style={styles.title}>{t("enter_phone")}</Text>
-      <TextInput
-        style={styles.input}
-        placeholder={t("phone_number")}
-        placeholderTextColor={colors.secondary}
-        keyboardType="phone-pad"
+
+      <PhoneInput
+        defaultValues={{
+          countryCode: "VN",
+          callingCode: "+84",
+          phoneNumber: "+84",
+        }}
+        value={phoneNumber}
+        onChangeText={(text) => setPhoneNumber(text)}
+        onChangeCountry={(country) => setCountryCode(country.cca2)}
+        autoFocus={true}
+        disabled={false}
+        countryPickerProps={{
+          withFilter: true,
+          withFlag: true,
+          withCountryNameButton: true,
+        }}
+        theme={{
+          containerStyle: styles.input,
+        }}
+        hideDropdownIcon={false}
+        isCallingCodeEditable={false}
       />
     </View>
   );
@@ -48,13 +83,7 @@ const styles = StyleSheet.create({
   input: {
     width: "80%",
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.secondary,
-    padding: 16,
     margin: 24,
-    color: colors.text,
-    fontSize: fonts.size.medium,
-    fontWeight: "600",
   },
 });
 export default InputScreen;

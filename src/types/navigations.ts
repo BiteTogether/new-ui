@@ -1,8 +1,8 @@
 export type AuthStackParamList = {
   Login: undefined;
   Input: undefined;
-  OTP: undefined;
-  Register: undefined;
+  OTP: { phoneNumber: string };
+  Register: { idToken: string };
 };
 
 export type MainStackParamList = {

@@ -1,9 +1,15 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { STORAGE_KEYS } from "../utils/keys";
 import { API_CONFIG } from "./config";
 import { ApiResponse } from "../types";
-import { refreshToken } from "./api/authApi";
+import { RefreshTokenRequest, RefreshTokenResponse } from "../types/auth";
+import { API_ENDPOINTS } from "./endpoints";
+import {
+  getToken,
+  saveToken,
+  getRefreshToken,
+  deleteToken,
+  deleteRefreshToken,
+} from "../utils/secureStore";
 
 class ApiService {
   private instance: AxiosInstance;
@@ -24,7 +30,7 @@ class ApiService {
     // Request interceptor to add auth token
     this.instance.interceptors.request.use(
       async (config) => {
-        const token = await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+        const token = await getToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -45,14 +51,14 @@ class ApiService {
           originalRequest._retry = true;
 
           try {
-            const refreshTokenValue = await AsyncStorage.getItem(
-              STORAGE_KEYS.REFRESH_TOKEN,
-            );
+            const refreshTokenValue = await getRefreshToken();
             if (refreshTokenValue) {
-              const response = await refreshToken(refreshTokenValue);
+              const response = await ApiService.refreshToken({
+                refresh_token: refreshTokenValue,
+              });
               if (response.data && response.data.access_token) {
                 const token = response.data.access_token;
-                await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
+                await saveToken(token);
 
                 // Retry the original request with new token
                 originalRequest.headers.Authorization = `Bearer ${token}`;
@@ -74,10 +80,14 @@ class ApiService {
   }
 
   private async clearTokens(): Promise<void> {
-    await AsyncStorage.multiRemove([
-      STORAGE_KEYS.ACCESS_TOKEN,
-      STORAGE_KEYS.REFRESH_TOKEN,
-    ]);
+    await deleteToken();
+    await deleteRefreshToken();
+  }
+
+  // Static method to refresh token without causing circular dependency
+  static async refreshToken(data: RefreshTokenRequest) {
+    const axios = (await import("axios")).default;
+    return axios.post<RefreshTokenResponse>(API_ENDPOINTS.AUTH.REFRESH, data);
   }
 
   async get<T>(

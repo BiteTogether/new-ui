@@ -1,12 +1,11 @@
 {
   "expo": {
-    "name": "my-app",
-    "slug": "my-app",
+    "name": "BiteTogether",
+    "slug": "BiteTogether",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -22,7 +21,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "googleServicesFile": "./google-services.json",
       "package": "com.bitetogether"
@@ -47,7 +45,26 @@
           }
         }
       ],
-      "expo-secure-store"
-    ]
+      "expo-secure-store",
+      "expo-font",
+      [
+        "./plugins/withAndroidDesugaring",
+        {
+          "desugarVersion": "2.1.3"
+        }
+      ],
+      [
+        "react-native-maps",
+        {
+          "androidGoogleMapsApiKey": "process.env.ANDROID_GOOGLE_MAPS_API_KEY",
+          "iosGoogleMapsApiKey": "process.env.IOS_GOOGLE_MAPS_API_KEY"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "17033bd2-7e48-4152-a3cb-b12619fb3555"
+      }
+    }
   }
 }
