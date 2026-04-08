@@ -26,5 +26,21 @@
 "sending_otp": "Đang gửi OTP...",
 "full_name": "Họ và tên",
 "register_failed": "Đăng ký thất bại. Vui lòng thử lại.",
-"username_taken": "Tên người dùng đã tồn tại. Vui lòng chọn tên khác."
+"username_taken": "Tên người dùng đã tồn tại. Vui lòng chọn tên khác.",
+"friends": "Bạn bè",
+"settings": "Cài đặt",
+"account": "Tài khoản",
+"system_settings": "Cài đặt hệ thống",
+"logout": "Đăng xuất",
+"logout_confirm": "Bạn có chắc chắn muốn đăng xuất không?",
+"delete_account": "Xóa tài khoản",
+"user_update_success": "Cập nhật thông tin thành công",
+"user_update_failed": "Cập nhật thông tin thất bại. Vui lòng thử lại.",
+"save": "Lưu",
+"cancel": "Hủy",
+"delete": "Xóa",
+"delete_account_confirm": "Bạn có chắc chắn muốn xóa tài khoản của mình không?",
+"error_back_to_login": "Đã xảy ra lỗi. Vui lòng đăng nhập lại.",
+"delete_account_success": "Xóa tài khoản thành công.",
+"delete_account_failed": "Xóa tài khoản thất bại. Vui lòng thử lại."
 }

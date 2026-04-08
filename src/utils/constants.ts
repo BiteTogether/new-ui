@@ -4,6 +4,9 @@ const colors = {
   accent: "#4D4D4D",
   background: "#1F1F1F",
   text: "#FFFFFF",
+  error: "#F44336",
+  cancel: "#2196F3",
+  neutral: "#EEEEEE",
 };
 
 const fonts = {

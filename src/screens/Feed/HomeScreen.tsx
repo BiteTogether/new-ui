@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, TextInput } from "react-native";
-import { useTranslation } from "react-i18next";
+import { View, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { AuthStackParamList } from "../../types/navigations";
-import { colors, fonts } from "../../utils/constants";
+import { MainStackParamList } from "../../types/navigations";
+import { colors } from "../../utils/constants";
 import BottomTab from "./components/BottomTab";
 import { Modalize } from "react-native-modalize";
 import * as Location from "expo-location";
@@ -15,8 +14,7 @@ import ChatListScreen from "../Chat/ChatListScreen";
 import ModalMap from "./components/ModalMap";
 
 const HomeScreen = () => {
-  const { t } = useTranslation();
-  const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
+  const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
   const [region, setRegion] = useState<Region | undefined>(undefined);
   const SearchRef = useRef<Modalize>(null);
   const FriendsRef = useRef<Modalize>(null);
@@ -37,6 +35,10 @@ const HomeScreen = () => {
 
   const handleOpenChatList = () => {
     ChatListRef.current?.open();
+  };
+
+  const handleOpenProfile = () => {
+    navigation.navigate("Profile");
   };
 
   useEffect(() => {
@@ -72,6 +74,7 @@ const HomeScreen = () => {
         onOpenSearch={handleOpenSearch}
         onOpenFriends={handleOpenFriends}
         onOpenChatList={handleOpenChatList}
+        onOpenProfile={handleOpenProfile}
       />
 
       {modals.map(({ ref, Component }, idx) => (

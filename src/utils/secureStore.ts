@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
-const TOKEN_KEY = "idToken";
+const TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 
 export async function saveToken(token: string) {

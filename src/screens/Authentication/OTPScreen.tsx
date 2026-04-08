@@ -112,7 +112,7 @@ const OTPScreen = () => {
       if (res.status === 200 && res.data?.valid) {
         navigation.navigate("Register", { idToken });
       } else if (res.status === 200 && !res.data?.valid) {
-        await dispatch(userLogin({ idToken: idToken }));
+        await dispatch(userLogin({ idToken: idToken })).unwrap();
       }
     } catch (error) {
       Toast.show({

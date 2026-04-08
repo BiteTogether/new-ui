@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -12,6 +12,8 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
 import { userRegister } from "../../store/auth/authActions";
 import Loading from "../../components/Loading";
+import InfoInput from "../../components/InfoInput";
+import { isValidUsername } from "../../utils/validation";
 
 const RegisterScreen = () => {
   const { t } = useTranslation();
@@ -28,9 +30,7 @@ const RegisterScreen = () => {
   };
 
   const handleGoNext = async () => {
-    // Username validation: 6-20 chars, letters, numbers, _ and . only
-    const usernameRegex = /^[a-zA-Z0-9_.]{6,20}$/;
-    if (!usernameRegex.test(username)) {
+    if (!isValidUsername(username)) {
       Toast.show({
         type: "error",
         text1: t("invalid_username"),
@@ -52,7 +52,7 @@ const RegisterScreen = () => {
             username: cleanUsername,
             fullName: cleanFullName,
           }),
-        );
+        ).unwrap();
       } else if (res.status === 200 && !res.data?.valid) {
         Toast.show({
           type: "error",
@@ -80,23 +80,14 @@ const RegisterScreen = () => {
         isDisabledNext={!username || !fullName}
       />
       <Text style={styles.title}>{t("enter_info")}</Text>
-      <TextInput
-        style={styles.input}
-        placeholder={t("username")}
-        placeholderTextColor={colors.secondary}
-        value={username}
-        onChangeText={setUsername}
-        autoCapitalize="none"
-      />
-      <Text style={styles.subtitle}>{t("username_helper_text")}</Text>
-      <TextInput
-        style={styles.input}
-        placeholder={t("full_name")}
-        placeholderTextColor={colors.secondary}
-        value={fullName}
-        onChangeText={setFullName}
-        autoCapitalize="none"
-      />
+      <View style={{ width: "100%", padding: 24 }}>
+        <InfoInput
+          username={username}
+          setUsername={setUsername}
+          fullName={fullName}
+          setFullName={setFullName}
+        />
+      </View>
     </View>
   );
 };
@@ -113,23 +104,6 @@ const styles = StyleSheet.create({
     fontSize: fonts.size.large,
     color: colors.text,
     fontWeight: "bold",
-  },
-
-  subtitle: {
-    fontSize: fonts.size.medium,
-    color: colors.secondary,
-  },
-
-  input: {
-    width: "80%",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.secondary,
-    padding: 16,
-    margin: 24,
-    color: colors.text,
-    fontSize: fonts.size.medium,
-    fontWeight: "600",
   },
 });
 export default RegisterScreen;
