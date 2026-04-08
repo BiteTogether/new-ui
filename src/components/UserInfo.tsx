@@ -2,14 +2,21 @@ import React from "react";
 import { StyleSheet, TouchableOpacity, Text } from "react-native";
 import Avatar from "./Avatar";
 import { colors, fonts } from "../utils/constants";
+import { UserInfo as UserInfoType } from "../types/user";
 
 interface UserInfoProps {
   onPress?: () => void;
+  isDisabled?: boolean;
+  userInfo?: UserInfoType | null;
 }
 
-const UserInfo = ({ onPress }: UserInfoProps) => {
+const UserInfo = ({ onPress, isDisabled, userInfo }: UserInfoProps) => {
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={onPress}
+      disabled={isDisabled}
+    >
       <Avatar size={40} />
       <Text style={styles.username_text}>ngocanh</Text>
     </TouchableOpacity>

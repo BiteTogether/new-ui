@@ -3,16 +3,26 @@ import { API_CONFIG } from "./config";
 import { ApiResponse } from "../types";
 import { RefreshTokenRequest, RefreshTokenResponse } from "../types/auth";
 import { API_ENDPOINTS } from "./endpoints";
-import {
-  getToken,
-  saveToken,
-  getRefreshToken,
-  deleteToken,
-  deleteRefreshToken,
-} from "../utils/secureStore";
+import { getToken, saveToken, getRefreshToken } from "../utils/secureStore";
 
-class ApiService {
+type LogoutHandler = (() => void) | null;
+
+export class ApiService {
   private instance: AxiosInstance;
+  // Private static logout handler, only set via setLogoutHandler
+  private static _logoutHandler: LogoutHandler = null;
+
+  // Static method to set the logout handler, can be called from App.tsx
+  static setLogoutHandler(handler: () => void) {
+    ApiService._logoutHandler = handler;
+  }
+
+  // Static method to call the logout handler, used in interceptors when token refresh fails
+  static callLogoutHandler() {
+    if (ApiService._logoutHandler) {
+      ApiService._logoutHandler();
+    }
+  }
 
   constructor() {
     this.instance = axios.create({
@@ -22,7 +32,6 @@ class ApiService {
         "Content-Type": "application/json",
       },
     });
-
     this.setupInterceptors();
   }
 
@@ -66,10 +75,8 @@ class ApiService {
               }
             }
           } catch (refreshError) {
-            // Refresh failed, redirect to login
-            await this.clearTokens();
-            // Token refresh failed, redirecting to login
-            // Dispatch a logout action
+            // Refresh failed, call logout handler if set
+            ApiService.callLogoutHandler();
             console.error("Error refreshing token:", refreshError);
           }
         }
@@ -77,11 +84,6 @@ class ApiService {
         return Promise.reject(error);
       },
     );
-  }
-
-  private async clearTokens(): Promise<void> {
-    await deleteToken();
-    await deleteRefreshToken();
   }
 
   // Static method to refresh token without causing circular dependency

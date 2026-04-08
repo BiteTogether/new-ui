@@ -65,14 +65,17 @@ export const userLogout = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await logout();
+      // Always clear tokens, even if API fails
+      await deleteToken();
+      await deleteRefreshToken();
       if (response.status === 200) {
-        // Delete tokens from secure storage
-        await deleteToken();
-        await deleteRefreshToken();
         return response.data;
       }
       return rejectWithValue(response.message);
     } catch (error: any) {
+      // Always clear tokens, even if API fails
+      await deleteToken();
+      await deleteRefreshToken();
       if (error.response?.data?.message) {
         return rejectWithValue(error.response.data.message);
       } else {

@@ -73,6 +73,7 @@ const authSlice = createSlice({
       .addCase(userLogout.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+        state.isSignedIn = false; // Even if logout fails, we consider the user signed out
       });
   },
 });

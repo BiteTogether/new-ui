@@ -11,7 +11,7 @@ interface BottomTabProps {
   onOpenFriends: () => void;
   // onOpenCamera: () => void;
   onOpenChatList: () => void;
-  // onOpenProfile: () => void;
+  onOpenProfile: () => void;
 }
 
 const BottomTab = ({
@@ -19,7 +19,7 @@ const BottomTab = ({
   onOpenFriends,
   // onOpenCamera,
   onOpenChatList,
-  // onOpenProfile,
+  onOpenProfile,
 }: BottomTabProps) => {
   return (
     <View style={styles.container}>
@@ -39,7 +39,9 @@ const BottomTab = ({
         <ChatIcon size={28} color={colors.secondary} />
       </TouchableOpacity>
 
-      <Avatar size={28} />
+      <TouchableOpacity onPress={onOpenProfile}>
+        <Avatar size={28} />
+      </TouchableOpacity>
     </View>
   );
 };

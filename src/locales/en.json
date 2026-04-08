@@ -26,5 +26,21 @@
 "sending_otp": "Sending OTP...",
 "full_name": "Full Name",
 "register_failed": "Registration failed. Please try again.",
-"username_taken": "Username already exists. Please choose another one."
+"username_taken": "Username already exists. Please choose another one.",
+"friends": "Friends",
+"settings": "Settings",
+"account": "Account",
+"system_settings": "System settings",
+"logout": "Logout",
+"logout_confirm": "Are you sure you want to logout?",
+"delete_account": "Delete account",
+"user_update_success": "Information updated successfully",
+"user_update_failed": "Information update failed. Please try again.",
+"save": "Save",
+"cancel": "Cancel",
+"delete": "Delete",
+"delete_account_confirm": "Are you sure you want to delete your account?",
+"error_back_to_login": "An error occurred. Please log in again.",
+"delete_account_success": "Account deleted successfully.",
+"delete_account_failed": "Account delete failed. Please try again."
 }
