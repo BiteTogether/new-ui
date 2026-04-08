@@ -13,10 +13,18 @@
 "enter_username": "Enter your username",
 "enter_phone": "Enter your phone number",
 "enter_otp": "Enter the OTP sent to",
-"username_helper_text": "6-20 characters, Letters, numbers, _ and . only",
+"enter_info": "Enter your information",
+"username_helper_text": "6-20 characters, letters, numbers, _ and . only",
 "otp_helper_text": "Didn't receive the code?",
 "resend": "Resend",
 "chat": "Chat",
 "search_by_username": "Search by username",
-"send_messages": "Send messages..."
+"send_messages": "Send messages...",
+"invalid_phone": "Invalid phone number. Please try again.",
+"invalid_otp": "Invalid OTP. Please try again.",
+"invalid_username": "Invalid username. Please try again.",
+"sending_otp": "Sending OTP...",
+"full_name": "Full Name",
+"register_failed": "Registration failed. Please try again.",
+"username_taken": "Username already exists. Please choose another one."
 }

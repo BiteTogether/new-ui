@@ -1,8 +1,5 @@
-import React, { useRef } from "react";
+import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-// import { useNavigation } from "@react-navigation/native";
-// import { StackNavigationProp } from "@react-navigation/stack";
-// import { MainStackParamList } from "../../../types/navigations";
 import { Feather } from "@expo/vector-icons";
 import { colors } from "../../../utils/constants";
 import ChatIcon from "../../../../assets/icons/ChatIcon";
@@ -10,17 +7,27 @@ import Avatar from "../../../components/Avatar";
 import CameraIcon from "../../../../assets/icons/CameraIcon";
 
 interface BottomTabProps {
+  onOpenSearch: () => void;
+  onOpenFriends: () => void;
+  // onOpenCamera: () => void;
   onOpenChatList: () => void;
+  // onOpenProfile: () => void;
 }
 
-const BottomTab = ({ onOpenChatList }: BottomTabProps) => {
+const BottomTab = ({
+  onOpenSearch,
+  onOpenFriends,
+  // onOpenCamera,
+  onOpenChatList,
+  // onOpenProfile,
+}: BottomTabProps) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={onOpenSearch}>
         <Feather name="search" size={28} color={colors.secondary} />
       </TouchableOpacity>
 
-      <TouchableOpacity>
+      <TouchableOpacity onPress={onOpenFriends}>
         <Feather name="users" size={28} color={colors.secondary} />
       </TouchableOpacity>
 

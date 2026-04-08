@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { colors, fonts } from "../../../utils/constants";
@@ -8,18 +8,25 @@ import { SafeAreaView } from "react-native-safe-area-context";
 interface NavigationButtonProps {
   onGoBack?: () => void;
   onGoNext?: () => void;
+  isDisabledNext?: boolean;
 }
 
-const NavigationButton = ({ onGoBack, onGoNext }: NavigationButtonProps) => {
+const NavigationButton = ({
+  onGoBack,
+  onGoNext,
+  isDisabledNext,
+}: NavigationButtonProps) => {
   const { t } = useTranslation();
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity onPress={onGoBack}>
         <Feather name="arrow-left" size={24} color={colors.text} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={onGoNext}>
-        <Text style={styles.buttonText}>{t("next")}</Text>
-      </TouchableOpacity>
+      {!isDisabledNext && (
+        <TouchableOpacity style={styles.button} onPress={onGoNext}>
+          <Text style={styles.buttonText}>{t("next")}</Text>
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 };
@@ -31,6 +38,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
+    height: 80,
     paddingHorizontal: 24,
   },
 

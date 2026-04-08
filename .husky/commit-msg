@@ -1,0 +1,13 @@
+commit_msg_file=$1
+commit_msg=$(cat "$commit_msg_file")
+
+# Check custom regex
+pattern='^\[[a-zA-Z0-9_-]+\] (Add|Update|Fix|Refactor|Remove) .+$'
+if ! echo "$commit_msg" | grep -Eq "$pattern"; then
+  echo "\033[0;31m✖ Commit message must match: [context] (Add|Update|Fix|Refactor|Remove) message\033[0m"
+  echo "Example: [auth] Add login API"
+  exit 1
+fi
+
+# Check commitlint
+npx --no -- commitlint --edit "$commit_msg_file"
