@@ -29,6 +29,11 @@ const ConfirmModal = ({
       onRequestClose={onCancel}
     >
       <View style={styles.overlay}>
+        <TouchableOpacity
+          style={styles.touch_overlay}
+          activeOpacity={1}
+          onPress={onCancel}
+        />
         <View style={styles.modalBox}>
           <View style={{ padding: 24 }}>
             <Text style={styles.title}>{title}</Text>
@@ -57,6 +62,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  touch_overlay: {
+    ...StyleSheet.absoluteFill,
   },
   modalBox: {
     width: "80%",

@@ -1,15 +1,42 @@
-import React from "react";
+import React, { useMemo, useEffect } from "react";
 import { View, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { colors, fonts } from "../utils/constants";
 import { Feather } from "@expo/vector-icons";
+import debounce from "lodash.debounce";
+import { searchUsers } from "../services/api/userApi";
 
 interface SearchBarProps {
-  placeholder?: string;
-  type?: "chat";
+  placeholder: string;
+  type: "search_friends" | "search_map";
+  setSearchResult: (result: any) => void;
 }
 
-const SearchBar = ({ placeholder, type }: SearchBarProps) => {
-  const handleSearch = () => {};
+const SearchBar = ({ placeholder, type, setSearchResult }: SearchBarProps) => {
+  const handleSearch = async (text: string) => {
+    let res;
+    try {
+      if (type === "search_friends") {
+        res = await searchUsers(text.trim());
+        if (res.status === 200 && res.data) {
+          setSearchResult(res.data);
+        } else setSearchResult(null);
+      } else if (type === "search_map") {
+        // Search map logic here (if needed)
+      }
+    } catch (error) {
+      console.error("Error searching:", error);
+    }
+  };
+
+  // Just create the debounced function once, and reuse it across renders
+  const debouncedSearch = useMemo(() => debounce(handleSearch, 400), []);
+
+  // Cleanup debounce when component unmounts (leak memory if not)
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
 
   return (
     <View style={styles.container}>
@@ -17,7 +44,8 @@ const SearchBar = ({ placeholder, type }: SearchBarProps) => {
         style={styles.input}
         placeholder={placeholder}
         placeholderTextColor={colors.secondary}
-        // onChangeText={(text) => onSearch?.(text)}
+        onChangeText={(text) => debouncedSearch(text)}
+        autoCapitalize="none"
       />
       <TouchableOpacity>
         <Feather name="search" size={24} color={colors.secondary} />
@@ -42,7 +70,6 @@ const styles = StyleSheet.create({
   input: {
     color: colors.text,
     fontSize: fonts.size.medium,
-    fontWeight: "600",
     width: "85%",
   },
 });

@@ -12,10 +12,13 @@ import SearchScreen from "../Search/SearchScreen";
 import FriendsScreen from "../Friends/FriendsScreen";
 import ChatListScreen from "../Chat/ChatListScreen";
 import ModalMap from "./components/ModalMap";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store";
 
 const HomeScreen = () => {
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
   const [region, setRegion] = useState<Region | undefined>(undefined);
+  const { userInfo } = useSelector((state: RootState) => state.user);
   const SearchRef = useRef<Modalize>(null);
   const FriendsRef = useRef<Modalize>(null);
   const ChatListRef = useRef<Modalize>(null);
@@ -38,7 +41,7 @@ const HomeScreen = () => {
   };
 
   const handleOpenProfile = () => {
-    navigation.navigate("Profile");
+    navigation.navigate("Profile", { id: userInfo!.id });
   };
 
   useEffect(() => {
