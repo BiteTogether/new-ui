@@ -39,11 +39,31 @@ const AccountSettingsScreen = () => {
       setIsLoading(true);
       const cleanUsername = username.trim().toLowerCase();
       const cleanFullName = fullName.trim();
-      const res = await validateInfo({
-        criteriaType: "USERNAME",
-        criteriaValue: cleanUsername,
-      });
-      if (res.status === 200 && res.data?.valid) {
+      if (cleanUsername !== userInfo?.username) {
+        const res = await validateInfo({
+          criteriaType: "USERNAME",
+          criteriaValue: cleanUsername,
+        });
+        if (res.status === 200 && res.data?.valid) {
+          await dispatch(
+            userUpdateInfo({
+              id: userInfo!.id,
+              username: cleanUsername,
+              fullName: cleanFullName,
+            }),
+          ).unwrap();
+
+          Toast.show({
+            type: "success",
+            text1: t("user_update_success"),
+          });
+        } else if (res.status === 200 && !res.data?.valid) {
+          Toast.show({
+            type: "error",
+            text1: t("username_taken"),
+          });
+        }
+      } else {
         await dispatch(
           userUpdateInfo({
             id: userInfo!.id,
@@ -55,11 +75,6 @@ const AccountSettingsScreen = () => {
         Toast.show({
           type: "success",
           text1: t("user_update_success"),
-        });
-      } else if (res.status === 200 && !res.data?.valid) {
-        Toast.show({
-          type: "error",
-          text1: t("username_taken"),
         });
       }
     } catch (error) {

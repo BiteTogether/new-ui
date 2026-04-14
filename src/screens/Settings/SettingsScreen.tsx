@@ -25,14 +25,16 @@ const SettingsScreen = () => {
     (state: RootState) => state.user,
   );
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
-  const [showModalDelete, setShowModalDelete] = useState<boolean>(false);
-  const [showModalLogout, setShowModalLogout] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
 
   const handleLogout = () => {
+    setShowLogoutModal(false);
     dispatch(userLogout());
   };
 
   const handleDeleteAccount = async () => {
+    setShowDeleteModal(false);
     try {
       await dispatch(userDeleteInfo(userInfo!.id)).unwrap();
       Toast.show({
@@ -73,7 +75,7 @@ const SettingsScreen = () => {
 
         <TouchableOpacity
           style={styles.func_container}
-          onPress={() => setShowModalDelete(true)}
+          onPress={() => setShowDeleteModal(true)}
         >
           <Feather name="trash" size={24} color={colors.error} />
           <Text style={[styles.func_text, { color: colors.error }]}>
@@ -82,14 +84,13 @@ const SettingsScreen = () => {
         </TouchableOpacity>
 
         <ConfirmModal
-          visible={showModalDelete}
+          visible={showDeleteModal}
           title={t("delete_account")}
           message={t("delete_account_confirm")}
           confirmText={t("delete")}
           cancelText={t("cancel")}
-          onCancel={() => setShowModalDelete(false)}
+          onCancel={() => setShowDeleteModal(false)}
           onConfirm={() => {
-            setShowModalDelete(false);
             handleDeleteAccount();
           }}
         />
@@ -98,20 +99,19 @@ const SettingsScreen = () => {
       <View style={styles.button_logout_container}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => setShowModalLogout(true)}
+          onPress={() => setShowLogoutModal(true)}
         >
           <Text style={styles.buttonText}>{t("logout")}</Text>
         </TouchableOpacity>
       </View>
       <ConfirmModal
-        visible={showModalLogout}
+        visible={showLogoutModal}
         title={t("logout")}
         message={t("logout_confirm")}
         confirmText={t("logout")}
         cancelText={t("cancel")}
-        onCancel={() => setShowModalLogout(false)}
+        onCancel={() => setShowLogoutModal(false)}
         onConfirm={() => {
-          setShowModalLogout(false);
           handleLogout();
         }}
       />
@@ -161,7 +161,8 @@ const styles = StyleSheet.create({
   },
 
   func_list: {
-    gap: 16,
+    gap: 24,
+    marginTop: 32,
   },
 });
 

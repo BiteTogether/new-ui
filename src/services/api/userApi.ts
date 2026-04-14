@@ -1,6 +1,11 @@
 import apiService from "../index";
 import { API_ENDPOINTS } from "../endpoints";
-import { ValidateRequest, ValidateResponse, UserInfo } from "../../types/user";
+import {
+  ValidateRequest,
+  ValidateResponse,
+  UserInfo,
+  SearchFriendResponse,
+} from "../../types/user";
 
 export const validateInfo = (data: ValidateRequest) => {
   return apiService.post<ValidateResponse>(API_ENDPOINTS.USER.VALIDATE, data);
@@ -30,6 +35,20 @@ export const deleteMyInfo = (id: number) => {
   return apiService.delete(endpoint);
 };
 
+export const searchUsers = (keyword: string) => {
+  return apiService.post<SearchFriendResponse>(
+    API_ENDPOINTS.USER.MY_INFO.SEARCH,
+    {
+      keyword,
+    },
+  );
+};
+
+export const getUserInfo = (id: number) => {
+  const endpoint = API_ENDPOINTS.USER.INFO.replace("{id}", id.toString());
+  return apiService.get<UserInfo>(endpoint);
+};
+
 // export const uploadAvatar = (id: number, avatarFile: File) => {
 //   const endpoint = API_ENDPOINTS.USER.MY_INFO.UPLOAD_AVATAR.replace(
 //     "{id}",
@@ -48,11 +67,4 @@ export const deleteMyInfo = (id: number) => {
 //     id.toString(),
 //   );
 //   return apiService.delete(endpoint);
-// };
-
-// export const searchUsers = (query: string) => {
-//   const endpoint =
-//     API_ENDPOINTS.USER.MY_INFO.SEARCH +
-//     `    ?query=${encodeURIComponent(query)}`;
-//   return apiService.get<UserInfo[]>(endpoint);
 // };

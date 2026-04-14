@@ -35,6 +35,7 @@ const OTPScreen = () => {
   const [isResendDisabled, setIsResendDisabled] = useState<boolean>(true);
   const dispatch = useDispatch<AppDispatch>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
 
   // If null, no SMS has been sent
   const [confirm, setConfirm] = useState<any>(null);
@@ -74,9 +75,15 @@ const OTPScreen = () => {
   // Handle the button press
   async function handleSignInWithPhoneNumber(phoneNumber: string) {
     try {
+      setError(null);
       const confirmation = await signInWithPhoneNumber(getAuth(), phoneNumber);
       setConfirm(confirmation);
     } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: t("otp_send_failed"),
+      });
+      setError(error as Error);
       console.error("Error sending OTP: ", error);
     }
   }
@@ -166,7 +173,7 @@ const OTPScreen = () => {
       />
 
       <View style={styles.text_container}>
-        {!confirm ? (
+        {!confirm && !error ? (
           <>
             <Text style={styles.subtitle}>{t("sending_otp")} </Text>
             <ActivityIndicator color={colors.primary} />
