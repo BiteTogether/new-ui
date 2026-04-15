@@ -61,5 +61,11 @@
 "remove_friend_confirm": "Are you sure you want to remove this friend?",
 "options": "Options",
 "remove_friend_success": "Friend removed successfully.",
-"remove_friend_error": "Failed to remove friend. Please try again."
+"remove_friend_error": "Failed to remove friend. Please try again.",
+"edit_message": "Edit message",
+"delete_message": "Delete message",
+"delete_message_confirm": "Are you sure you want to delete this message?",
+"delete_message_error": "Failed to delete message. Please try again.",
+"edit_message_error": "Failed to edit message. Please try again.",
+"editing": "Editing"
 }

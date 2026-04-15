@@ -181,8 +181,15 @@ const FriendsScreen = () => {
     username: string,
     fullName: string,
     avatar: string | null,
+    conversationId: string | null,
   ) => {
-    navigation.navigate("Chat", { id, username, fullName, avatar });
+    navigation.navigate("Chat", {
+      id,
+      username,
+      fullName,
+      avatar,
+      conversationId,
+    });
   };
 
   const handleOpenProfile = (id: number) => {
@@ -295,6 +302,7 @@ const FriendsScreen = () => {
                   searchResult.username,
                   searchResult.fullName,
                   searchResult.avatar,
+                  searchResult.conversationId,
                 )
               }
             >
@@ -369,6 +377,7 @@ const FriendsScreen = () => {
                     item.username,
                     item.fullName,
                     item.avatar,
+                    item.conversationId,
                   )
                 }
               >

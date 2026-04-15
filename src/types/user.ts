@@ -21,6 +21,7 @@ export interface UserInfo {
   friendsCount: number;
   pushNotificationsEnabled: boolean;
   inAppNotificationsEnabled: boolean;
+  conversationId: string | null;
 }
 
 export interface FriendInfo {
@@ -50,4 +51,5 @@ export interface SearchFriendResponse {
   hasFriendRequestReceived: boolean;
   friendRequestId: number;
   isFriend: boolean;
+  conversationId: string | null;
 }

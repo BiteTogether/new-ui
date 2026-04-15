@@ -7,8 +7,14 @@ export type AuthStackParamList = {
 
 export type MainStackParamList = {
   Home: undefined;
-  Chat: undefined;
-  Profile: undefined;
+  Chat: {
+    id: number;
+    username: string;
+    fullName: string;
+    avatar: string | null;
+    conversationId: string | null;
+  };
+  Profile: { id: number };
   Settings: undefined;
   AccountSettings: undefined;
   SystemSettings: undefined;

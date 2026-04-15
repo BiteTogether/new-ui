@@ -61,5 +61,11 @@
 "remove_friend_confirm": "Bạn có chắc chắn muốn xóa bạn bè này không?",
 "options": "Tùy chọn",
 "remove_friend_success": "Xóa bạn bè thành công.",
-"remove_friend_error": "Xóa bạn bè thất bại. Vui lòng thử lại."
+"remove_friend_error": "Xóa bạn bè thất bại. Vui lòng thử lại.",
+"edit_message": "Chỉnh sửa tin nhắn",
+"delete_message": "Xóa tin nhắn",
+"delete_message_confirm": "Bạn có chắc chắn muốn xóa tin nhắn này không?",
+"delete_message_error": "Xóa tin nhắn thất bại. Vui lòng thử lại.",
+"edit_message_error": "Chỉnh sửa tin nhắn thất bại. Vui lòng thử lại.",
+"editing": "Đang chỉnh sửa"
 }

@@ -13,8 +13,7 @@ export const userGetInfo = createAsyncThunk(
       const response = await getMyInfo();
       if (response.status === 200 && response.data) {
         return response.data;
-      }
-      if ([403, 404, 410].includes(response.status)) {
+      } else if ([403, 404, 410].includes(response.status)) {
         dispatch(userLogout());
       }
       return rejectWithValue(response.message);

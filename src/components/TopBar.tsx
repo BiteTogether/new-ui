@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
@@ -87,6 +88,7 @@ const TopBar = ({
         username: userInfo.username,
         fullName: userInfo.fullName,
         avatar: userInfo.avatar,
+        conversationId: userInfo.conversationId,
       });
     }
   };
@@ -160,7 +162,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 12,
+    paddingVertical: Platform.OS === "ios" ? 0 : 12,
   },
 
   container: {
