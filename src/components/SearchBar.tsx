@@ -1,5 +1,11 @@
 import React, { useMemo, useEffect } from "react";
-import { View, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import { colors, fonts } from "../utils/constants";
 import { Feather } from "@expo/vector-icons";
 import debounce from "lodash.debounce";
@@ -7,7 +13,7 @@ import { searchUsers } from "../services/api/userApi";
 
 interface SearchBarProps {
   placeholder: string;
-  type: "search_friends" | "search_map";
+  type?: "search_friends" | "search_map";
   setSearchResult: (result: any) => void;
 }
 
@@ -22,6 +28,8 @@ const SearchBar = ({ placeholder, type, setSearchResult }: SearchBarProps) => {
         } else setSearchResult(null);
       } else if (type === "search_map") {
         // Search map logic here (if needed)
+      } else {
+        setSearchResult(text);
       }
     } catch (error) {
       console.error("Error searching:", error);
@@ -62,15 +70,17 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.secondary,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    marginVertical: 24,
+    paddingVertical: Platform.OS === "ios" ? 4 : 2,
+    paddingHorizontal: 12,
+    marginVertical: 16,
   },
 
   input: {
     color: colors.text,
     fontSize: fonts.size.medium,
-    width: "85%",
+    paddingHorizontal: 8,
+    paddingVertical: Platform.OS === "ios" ? 10 : undefined,
+    flex: 1,
   },
 });
 export default SearchBar;

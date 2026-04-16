@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
-import { colors, fonts } from "../../utils/constants";
+import { colors } from "../../utils/constants";
 import TopBar from "../../components/TopBar";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,7 +10,7 @@ import Toast from "react-native-toast-message";
 import { validateInfo } from "../../services/api/userApi";
 import InfoInput from "../../components/InfoInput";
 import Avatar from "../../components/Avatar";
-import { isValidUsername } from "../../utils/validation";
+import { isValidUsername } from "../../utils/helpers";
 
 const AccountSettingsScreen = () => {
   const { t } = useTranslation();
@@ -98,7 +98,7 @@ const AccountSettingsScreen = () => {
         isChanged={isChanged}
       />
       <View style={styles.avatar_container}>
-        <Avatar size={80} />
+        <Avatar size={100} />
       </View>
       <InfoInput
         username={username}
@@ -115,24 +115,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     backgroundColor: colors.background,
-  },
-
-  button: {
-    backgroundColor: colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 16,
-  },
-
-  buttonText: {
-    fontSize: fonts.size.medium,
-    fontWeight: "bold",
-  },
-
-  button_container: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: 16,
   },
 
   avatar_container: {

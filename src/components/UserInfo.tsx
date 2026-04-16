@@ -4,6 +4,7 @@ import Avatar from "./Avatar";
 import { colors, fonts } from "../utils/constants";
 import { UserInfo as UserInfoType, SearchFriendResponse } from "../types/user";
 import { FriendItem } from "../types/friends";
+import { truncateText } from "../utils/helpers";
 
 interface UserInfoProps {
   onPress?: () => void;
@@ -19,7 +20,9 @@ const UserInfo = ({ onPress, isDisabled, userInfo }: UserInfoProps) => {
       disabled={isDisabled}
     >
       <Avatar size={40} />
-      <Text style={styles.username_text}>{userInfo?.fullName}</Text>
+      <Text style={styles.username_text}>
+        {truncateText(userInfo?.fullName || "", 20)}
+      </Text>
     </TouchableOpacity>
   );
 };

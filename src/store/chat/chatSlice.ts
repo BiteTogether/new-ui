@@ -6,6 +6,11 @@ import {
   userDeleteMessage,
   userUpdateMessage,
   userCreateConversation,
+  userDeleteConversation,
+  userGetConversationById,
+  userUpdateConversation,
+  userRemoveMemberFromConversation,
+  userUpdateRoleInConversation,
 } from "./chatActions";
 import { ChatState } from "../../types/redux";
 
@@ -63,6 +68,88 @@ const chatSlice = createSlice({
         }
       })
       .addCase(userCreateConversation.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Delete conversations actions
+    builder
+      .addCase(userDeleteConversation.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userDeleteConversation.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        if (state.conversations) {
+          state.conversations.conversations =
+            state.conversations.conversations.filter(
+              (c) => c.id !== action.meta.arg,
+            );
+          state.conversations.size = state.conversations.conversations.length;
+        }
+      })
+      .addCase(userDeleteConversation.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Get conversation by ID actions
+    builder
+      .addCase(userGetConversationById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userGetConversationById.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userGetConversationById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Update conversation
+    builder
+      .addCase(userUpdateConversation.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userUpdateConversation.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userUpdateConversation.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Remove member from conversation
+    builder
+      .addCase(userRemoveMemberFromConversation.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userRemoveMemberFromConversation.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userRemoveMemberFromConversation.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Update user role in conversation
+    builder
+      .addCase(userUpdateRoleInConversation.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userUpdateRoleInConversation.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userUpdateRoleInConversation.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   FlatList,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MainStackParamList } from "../../types/navigations";
 import { colors, fonts } from "../../utils/constants";
@@ -189,6 +189,7 @@ const FriendsScreen = () => {
       fullName,
       avatar,
       conversationId,
+      type: "DIRECT",
     });
   };
 
@@ -196,30 +197,32 @@ const FriendsScreen = () => {
     navigation.navigate("Profile", { id });
   };
 
-  useEffect(() => {
-    const getList = async () => {
-      setFriendsLoading(true);
-      setRequestsLoading(true);
-      try {
-        const friendsList = await getFriendsList();
-        if (friendsList.status === 200 && friendsList.data) {
-          setFriendsList(friendsList.data);
-          setFriendsListCount(friendsList.totalElements || 0);
+  useFocusEffect(
+    useCallback(() => {
+      const getList = async () => {
+        setFriendsLoading(true);
+        setRequestsLoading(true);
+        try {
+          const friendsList = await getFriendsList();
+          if (friendsList.status === 200 && friendsList.data) {
+            setFriendsList(friendsList.data);
+            setFriendsListCount(friendsList.totalElements || 0);
+          }
+          const friendRequests = await getFriendRequests();
+          if (friendRequests.status === 200 && friendRequests.data) {
+            setFriendRequests(friendRequests.data);
+            setFriendRequestsCount(friendRequests.totalElements || 0);
+          }
+        } catch (error) {
+          console.error("Error fetching friends data:", error);
+        } finally {
+          setFriendsLoading(false);
+          setRequestsLoading(false);
         }
-        const friendRequests = await getFriendRequests();
-        if (friendRequests.status === 200 && friendRequests.data) {
-          setFriendRequests(friendRequests.data);
-          setFriendRequestsCount(friendRequests.totalElements || 0);
-        }
-      } catch (error) {
-        console.error("Error fetching friends data:", error);
-      } finally {
-        setFriendsLoading(false);
-        setRequestsLoading(false);
-      }
-    };
-    getList();
-  }, []);
+      };
+      getList();
+    }, []),
+  );
 
   if (friendsLoading || requestsLoading) {
     return <Loading />;
@@ -438,6 +441,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingVertical: 8,
   },
 
   add_button: {
@@ -454,7 +458,7 @@ const styles = StyleSheet.create({
   },
 
   no_result_text: {
-    color: colors.accent,
+    color: colors.neutral,
     textAlign: "center",
     marginTop: 16,
   },

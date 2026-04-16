@@ -27,10 +27,14 @@ export interface Conversation {
       createdBy: "SYSTEM" | "USER";
       updatedBy: "SYSTEM" | "USER";
       id: string;
-      userId: number;
-      username: string;
-      avatarUrl: string;
-      role: "ADMIN" | "USER";
+      chatUserSnapshot: {
+        userId: number;
+        username: string;
+        fullName: string;
+        phoneNumber: string;
+        avatar: string;
+      };
+      role: "ADMIN" | "MEMBER";
       lastReadMessageSequence: number;
       joinedAt: string;
     },
@@ -67,7 +71,7 @@ export interface AddUserToConversationResponse {
   userId: number;
   username: string;
   avatarUrl: string;
-  role: "ADMIN" | "USER";
+  role: "ADMIN" | "MEMBER";
   lastReadMessageSequence: number;
   joinedAt: string;
 }

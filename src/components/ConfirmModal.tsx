@@ -1,15 +1,28 @@
-import { StyleSheet, Text, View, Modal, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Modal,
+  TouchableOpacity,
+  TextInput,
+} from "react-native";
 import React from "react";
 import { colors, fonts } from "../utils/constants";
+import { useTranslation } from "react-i18next";
 
+import { ReactNode } from "react";
 interface ConfirmModalProps {
   visible: boolean;
   title: string;
-  message: string;
+  message?: string;
   onConfirm: () => void;
   onCancel: () => void;
   confirmText: string;
   cancelText: string;
+  hasInput?: boolean;
+  inputValue?: string;
+  setInputValue?: (value: string) => void;
+  children?: ReactNode;
 }
 
 const ConfirmModal = ({
@@ -20,7 +33,12 @@ const ConfirmModal = ({
   onCancel,
   confirmText,
   cancelText,
+  hasInput,
+  inputValue,
+  setInputValue,
+  children,
 }: ConfirmModalProps) => {
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -38,6 +56,15 @@ const ConfirmModal = ({
           <View style={{ padding: 24 }}>
             <Text style={styles.title}>{title}</Text>
             <Text style={styles.message}>{message}</Text>
+            {hasInput && (
+              <TextInput
+                style={styles.input}
+                placeholder={t("enter_group_name")}
+                value={inputValue}
+                onChangeText={setInputValue}
+              />
+            )}
+            {children}
           </View>
           <View style={styles.buttonRow}>
             <TouchableOpacity
@@ -112,6 +139,15 @@ const styles = StyleSheet.create({
   confirmText: {
     color: colors.error,
     fontWeight: "bold",
+    fontSize: fonts.size.medium,
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: colors.secondary,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     fontSize: fonts.size.medium,
   },
 });

@@ -75,9 +75,15 @@ export const updateUserRoleInConversation = (data: UserConversationRequest) => {
     "{conversationId}",
     data.conversationId,
   ).replace("{userId}", data.userId.toString());
-  return apiService.put(endpoint, {
-    role: data.role,
-  });
+  return apiService.patch(endpoint, null, { params: { role: data.role } });
+};
+
+export const getConversationById = (conversationId: string) => {
+  const endpoint = API_ENDPOINTS.CHAT.CONVERSATIONS.GET_BY_ID.replace(
+    "{conversationId}",
+    conversationId,
+  );
+  return apiService.get<Conversation>(endpoint);
 };
 
 // Message

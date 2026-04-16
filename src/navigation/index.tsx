@@ -13,6 +13,9 @@ import ProfileScreen from "../screens/Profile/ProfileScreen";
 import SettingsScreen from "../screens/Settings/SettingsScreen";
 import AccountSettingsScreen from "../screens/Settings/AccountSettingsScreen";
 import SystemSettingsScreen from "../screens/Settings/SystemSettingsScreen";
+import CreateGroupChatScreen from "../screens/Chat/CreateGroupChatScreen";
+import GroupDetailScreen from "../screens/Chat/GroupDetailScreen";
+import AddMemberScreen from "../screens/Chat/AddMemberScreen";
 
 import { useSelector, useDispatch } from "react-redux";
 import { loadToken } from "../store/auth/authSlice";
@@ -114,6 +117,12 @@ export default function Navigation() {
               name="SystemSettings"
               component={SystemSettingsScreen}
             />
+            <Stack.Screen
+              name="CreateGroupChat"
+              component={CreateGroupChatScreen}
+            />
+            <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
+            <Stack.Screen name="AddMember" component={AddMemberScreen} />
           </>
         ) : (
           <>

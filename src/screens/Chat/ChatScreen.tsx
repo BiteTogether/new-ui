@@ -38,7 +38,8 @@ const ChatScreen = () => {
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
   const { t } = useTranslation();
   const route = useRoute<RouteProp<MainStackParamList, "Chat">>();
-  const { id, username, fullName, avatar, conversationId } = route.params;
+  const { id, username, fullName, avatar, conversationId, type, name } =
+    route.params;
   const { messages, isConnected } = useWebSocket("SEND");
   const dispatch = useDispatch<AppDispatch>();
   const { state, conversations } = useSelector(
@@ -74,7 +75,7 @@ const ChatScreen = () => {
     };
   }, []);
 
-  const options: Option[] = [
+  const messageOptions: Option[] = [
     {
       label: t("edit_message"),
       onPress: () => {
@@ -91,6 +92,10 @@ const ChatScreen = () => {
       },
     },
   ];
+
+  const handleOpenGroupDetail = () => {
+    navigation.navigate("GroupDetail", { conversationId: conId! });
+  };
 
   const handleSendMessage = async (text: string) => {
     try {
@@ -192,17 +197,19 @@ const ChatScreen = () => {
           }),
         ).unwrap();
 
-        setMessagesList((prev) => ({
-          ...res,
-          messages: [
-            ...(Array.isArray(prev.messages)
-              ? prev.messages.filter(Boolean)
-              : []),
-            ...(Array.isArray(res.messages)
-              ? res.messages.filter(Boolean)
-              : []),
-          ],
-        }));
+        if (messagesList.nextCursor !== res.nextCursor) {
+          setMessagesList((prev) => ({
+            ...res,
+            messages: [
+              ...(Array.isArray(prev.messages)
+                ? prev.messages.filter(Boolean)
+                : []),
+              ...(Array.isArray(res.messages)
+                ? res.messages.filter(Boolean)
+                : []),
+            ],
+          }));
+        }
       } catch (error) {
         console.error("Error loading more messages:", error);
         Toast.show({
@@ -215,7 +222,7 @@ const ChatScreen = () => {
 
   useEffect(() => {
     const handleCreateConversation = async () => {
-      if (!conId) {
+      if (!conId && type === "DIRECT") {
         try {
           const res = await dispatch(
             userCreateConversation({
@@ -296,10 +303,26 @@ const ChatScreen = () => {
     >
       <View style={styles.container}>
         <View style={{ paddingHorizontal: 12 }}>
-          <TopBar
-            type="chat"
-            userInfo={{ id, username, fullName, avatar, conversationId: conId }}
-          />
+          {type === "DIRECT" && (
+            <TopBar
+              type={"chat-direct"}
+              userInfo={{
+                id,
+                username,
+                fullName,
+                avatar,
+                conversationId: conId,
+              }}
+            />
+          )}
+
+          {type === "GROUP" && (
+            <TopBar
+              type={"chat-group"}
+              groupInfo={{ name, avatar }}
+              onPressOption={handleOpenGroupDetail}
+            />
+          )}
         </View>
 
         {loading && (
@@ -319,6 +342,9 @@ const ChatScreen = () => {
           renderItem={({ item }) => (
             <MessageItem messageItem={item} onLongPress={handleLongPressMsg} />
           )}
+          ListEmptyComponent={
+            <Text style={styles.no_result_text}>{t("no_messages")}</Text>
+          }
         />
 
         {isUpdatingMode && (
@@ -366,7 +392,7 @@ const ChatScreen = () => {
       />
       <SelectModal
         visible={showSelectModal}
-        options={options}
+        options={messageOptions}
         onClose={() => setShowSelectModal(false)}
         title={t("options")}
       />
@@ -404,6 +430,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.text,
     padding: 2,
     borderRadius: 50,
+  },
+
+  no_result_text: {
+    color: colors.neutral,
+    textAlign: "center",
+    marginTop: 16,
   },
 });
 export default ChatScreen;
