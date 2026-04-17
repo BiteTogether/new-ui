@@ -3,6 +3,7 @@ export interface FriendItem {
   username: string;
   fullName: string;
   avatar: string;
+  conversationId: string | null;
 }
 export type FriendsListResponse = FriendItem[];
 

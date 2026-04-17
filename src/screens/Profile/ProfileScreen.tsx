@@ -11,6 +11,10 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { MainStackParamList } from "../../types/navigations";
 import Loading from "../../components/Loading";
 import { getUserInfo } from "../../services/api/userApi";
+import { removeFriend } from "../../services/api/friendsApi";
+import ConfirmModal from "../../components/ConfirmModal";
+import SelectModal, { Option } from "../../components/SelectModal";
+import Toast from "react-native-toast-message";
 
 const ProfileScreen = () => {
   const { t } = useTranslation();
@@ -20,6 +24,44 @@ const ProfileScreen = () => {
   const { id } = route.params;
   const [user, setUser] = useState(userInfo);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showSelectModal, setShowSelectModal] = useState<boolean>(false);
+  const [showRemoveModal, setShowRemoveModal] = useState<boolean>(false);
+
+  const options: Option[] = [
+    {
+      label: t("remove_friend"),
+      onPress: () => {
+        setShowSelectModal(false);
+        setShowRemoveModal(true);
+      },
+    },
+  ];
+
+  const handleOpenSelectModal = () => {
+    setShowSelectModal(true);
+  };
+
+  const handleRemoveFriend = async () => {
+    setShowRemoveModal(false);
+
+    try {
+      const res = await removeFriend(userInfo!.id);
+      if (res.status === 200) {
+        Toast.show({
+          type: "success",
+          text1: t("remove_friend_success"),
+        });
+        navigation.goBack();
+      } else {
+        Toast.show({
+          type: "error",
+          text1: t("remove_friend_error"),
+        });
+      }
+    } catch (error) {
+      console.error("Error removing friend:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchUserInfo = async (id: number) => {
@@ -51,6 +93,7 @@ const ProfileScreen = () => {
           <TopBar
             type={user?.id === userInfo?.id ? "myProfile" : "otherProfile"}
             userInfo={user}
+            onPressOption={handleOpenSelectModal}
           />
           <View style={styles.info_container}>
             <Avatar size={80} />
@@ -68,6 +111,25 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </View>
       )}
+
+      <SelectModal
+        visible={showSelectModal}
+        options={options}
+        onClose={() => setShowSelectModal(false)}
+        title={t("options")}
+      />
+
+      <ConfirmModal
+        visible={showRemoveModal}
+        title={t("remove_friend")}
+        message={t("remove_friend_confirm")}
+        confirmText={t("remove")}
+        cancelText={t("cancel")}
+        onCancel={() => setShowRemoveModal(false)}
+        onConfirm={() => {
+          handleRemoveFriend();
+        }}
+      />
     </View>
   );
 };

@@ -13,7 +13,7 @@ import { AppDispatch } from "../../store";
 import { userRegister } from "../../store/auth/authActions";
 import Loading from "../../components/Loading";
 import InfoInput from "../../components/InfoInput";
-import { isValidUsername } from "../../utils/validation";
+import { isValidUsername } from "../../utils/helpers";
 
 const RegisterScreen = () => {
   const { t } = useTranslation();

@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { userGetInfo, userUpdateInfo, userDeleteInfo } from "./userActions";
+import {
+  userGetInfo,
+  userUpdateInfo,
+  userDeleteInfo,
+  userGetUsersByIds,
+} from "./userActions";
 import { UserState } from "../../types/redux";
 
 const initialState: UserState = {
@@ -60,6 +65,21 @@ const userSlice = createSlice({
         state.userInfo = null;
       })
       .addCase(userDeleteInfo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Get users by IDs actions
+    builder
+      .addCase(userGetUsersByIds.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userGetUsersByIds.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userGetUsersByIds.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

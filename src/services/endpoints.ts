@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
       SEARCH: "/api/v1/users/search",
     },
     INFO: "/api/v1/users/{id}",
+    LIST: "/api/v1/users",
   },
   FRIENDS: {
     GET_LIST: "/api/v1/friends",
@@ -39,6 +40,7 @@ export const API_ENDPOINTS = {
         "/api/v1/conversations/{conversationId}/participants/{userId}",
       UPDATE_ROLE:
         "/api/v1/conversations/{conversationId}/participants/{userId}/role",
+      GET_BY_ID: "/api/v1/conversations/{conversationId}",
     },
     MESSAGES: {
       UPDATE: "/api/v1/messages/{messageId}",

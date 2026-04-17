@@ -13,6 +13,9 @@ import ProfileScreen from "../screens/Profile/ProfileScreen";
 import SettingsScreen from "../screens/Settings/SettingsScreen";
 import AccountSettingsScreen from "../screens/Settings/AccountSettingsScreen";
 import SystemSettingsScreen from "../screens/Settings/SystemSettingsScreen";
+import CreateGroupChatScreen from "../screens/Chat/CreateGroupChatScreen";
+import GroupDetailScreen from "../screens/Chat/GroupDetailScreen";
+import AddMemberScreen from "../screens/Chat/AddMemberScreen";
 
 import { useSelector, useDispatch } from "react-redux";
 import { loadToken } from "../store/auth/authSlice";
@@ -23,20 +26,24 @@ import { ApiService } from "../services";
 import { userLogout } from "../store/auth/authActions";
 import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
+import NetInfo from "@react-native-community/netinfo";
+import websocketService from "../services/webSocketService";
+import { AppState } from "react-native";
 
 const Stack = createNativeStackNavigator();
 
 export default function Navigation() {
   const { isSignedIn } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
-  const { loadingToken } = useSelector((state: RootState) => state.auth);
+  const { loadingToken, token } = useSelector((state: RootState) => state.auth);
   const { t } = useTranslation();
   const handleGetInfo = async () => {
     const resultAction = await dispatch(userGetInfo());
     if (userGetInfo.rejected.match(resultAction)) {
+      console.error("Failed to get user info:", resultAction.payload);
       Toast.show({
         type: "error",
-        text1: t("error_back_to_login"),
+        text1: t("network_error"),
       });
     }
   };
@@ -56,6 +63,38 @@ export default function Navigation() {
       dispatch(userLogout());
     });
   }, []);
+
+  useEffect(() => {
+    if (token) {
+      // Monitor network connectivity
+      const unsubscribe = NetInfo.addEventListener((state) => {
+        if (state.isConnected) {
+          websocketService.connect(token);
+        } else {
+          websocketService.disconnect();
+        }
+      });
+
+      // Monitor app state
+      const appStateSubscription = AppState.addEventListener(
+        "change",
+        (nextAppState) => {
+          if (nextAppState === "active") {
+            websocketService.connect(token);
+          } else if (nextAppState === "background") {
+            websocketService.disconnect();
+          }
+        },
+      );
+
+      // Clean up listeners
+      return () => {
+        unsubscribe();
+        appStateSubscription.remove();
+        websocketService.disconnect();
+      };
+    }
+  }, [token]);
 
   if (loadingToken) {
     return <Loading />;
@@ -78,6 +117,12 @@ export default function Navigation() {
               name="SystemSettings"
               component={SystemSettingsScreen}
             />
+            <Stack.Screen
+              name="CreateGroupChat"
+              component={CreateGroupChatScreen}
+            />
+            <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
+            <Stack.Screen name="AddMember" component={AddMemberScreen} />
           </>
         ) : (
           <>

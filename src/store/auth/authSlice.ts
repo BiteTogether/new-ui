@@ -14,6 +14,7 @@ const initialState: AuthState = {
   error: null,
   isSignedIn: false,
   loadingToken: true,
+  token: null,
 };
 
 const authSlice = createSlice({
@@ -25,6 +26,7 @@ const authSlice = createSlice({
     builder.addCase(loadToken.fulfilled, (state, action) => {
       state.isSignedIn = !!action.payload; // If token exists, user is signed in
       state.loadingToken = false;
+      state.token = action.payload;
     });
 
     // Login actions
@@ -33,10 +35,11 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(userLogin.fulfilled, (state) => {
+      .addCase(userLogin.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
         state.isSignedIn = true;
+        state.token = action.payload.access_token;
       })
       .addCase(userLogin.rejected, (state, action) => {
         state.loading = false;
@@ -49,10 +52,11 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(userRegister.fulfilled, (state) => {
+      .addCase(userRegister.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
         state.isSignedIn = true;
+        state.token = action.payload.access_token;
       })
       .addCase(userRegister.rejected, (state, action) => {
         state.loading = false;
@@ -69,6 +73,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = null;
         state.isSignedIn = false;
+        state.token = null;
       })
       .addCase(userLogout.rejected, (state, action) => {
         state.loading = false;

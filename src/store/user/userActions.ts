@@ -3,6 +3,7 @@ import {
   getMyInfo,
   updateMyInfo,
   deleteMyInfo,
+  getUsersByIds,
 } from "../../services/api/userApi";
 import { userLogout } from "../auth/authActions";
 
@@ -13,8 +14,7 @@ export const userGetInfo = createAsyncThunk(
       const response = await getMyInfo();
       if (response.status === 200 && response.data) {
         return response.data;
-      }
-      if ([403, 404, 410].includes(response.status)) {
+      } else if ([403, 404, 410].includes(response.status)) {
         dispatch(userLogout());
       }
       return rejectWithValue(response.message);
@@ -62,6 +62,25 @@ export const userDeleteInfo = createAsyncThunk(
       if (response.status === 200) {
         dispatch(userLogout());
         return response;
+      }
+      return rejectWithValue(response.message);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  },
+);
+
+export const userGetUsersByIds = createAsyncThunk(
+  "user/getUsersByIds",
+  async (userIds: number[], { rejectWithValue }) => {
+    try {
+      const response = await getUsersByIds(userIds);
+      if (response.status === 200 && response.data) {
+        return response.data;
       }
       return rejectWithValue(response.message);
     } catch (error: any) {

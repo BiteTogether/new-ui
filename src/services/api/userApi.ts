@@ -49,6 +49,12 @@ export const getUserInfo = (id: number) => {
   return apiService.get<UserInfo>(endpoint);
 };
 
+export const getUsersByIds = (userIds: number[]) => {
+  return apiService.get(API_ENDPOINTS.USER.LIST, {
+    params: { userIds },
+  });
+};
+
 // export const uploadAvatar = (id: number, avatarFile: File) => {
 //   const endpoint = API_ENDPOINTS.USER.MY_INFO.UPLOAD_AVATAR.replace(
 //     "{id}",
