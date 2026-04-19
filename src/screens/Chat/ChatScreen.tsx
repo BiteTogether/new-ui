@@ -282,6 +282,7 @@ const ChatScreen = () => {
   }, [conId]);
 
   useEffect(() => {
+    if (!messages.every((msg) => msg && msg.conversationId === conId)) return;
     setMessagesList((prev) => ({
       ...prev,
       messages: [
