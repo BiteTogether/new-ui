@@ -35,11 +35,17 @@ export const userUpdateInfo = createAsyncThunk(
       id,
       username,
       fullName,
-    }: { id: number; username: string; fullName: string },
+      avatar,
+    }: {
+      id: number;
+      username: string;
+      fullName: string;
+      avatar: string | null;
+    },
     { rejectWithValue },
   ) => {
     try {
-      const response = await updateMyInfo(id, username, fullName);
+      const response = await updateMyInfo(id, username, fullName, avatar);
       if (response.status === 200 && response.data) {
         return response.data;
       }

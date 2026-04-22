@@ -7,7 +7,7 @@ export interface Conversation {
   id: string;
   type: "DIRECT" | "GROUP";
   name: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
   latestMessage: {
     createdAt: string;
     updatedAt: string;
@@ -32,7 +32,7 @@ export interface Conversation {
         username: string;
         fullName: string;
         phoneNumber: string;
-        avatar: string;
+        avatar: string | null;
       };
       role: "ADMIN" | "MEMBER";
       lastReadMessageSequence: number;
@@ -70,7 +70,7 @@ export interface AddUserToConversationResponse {
   id: string;
   userId: number;
   username: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
   role: "ADMIN" | "MEMBER";
   lastReadMessageSequence: number;
   joinedAt: string;

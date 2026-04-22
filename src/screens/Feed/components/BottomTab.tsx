@@ -1,10 +1,13 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { colors } from "../../../utils/constants";
 import ChatIcon from "../../../../assets/icons/ChatIcon";
 import Avatar from "../../../components/Avatar";
 import CameraIcon from "../../../../assets/icons/CameraIcon";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
 
 interface BottomTabProps {
   onOpenSearch: () => void;
@@ -21,28 +24,30 @@ const BottomTab = ({
   onOpenChatList,
   onOpenProfile,
 }: BottomTabProps) => {
+  const { userInfo } = useSelector((state: RootState) => state.user);
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
       <TouchableOpacity onPress={onOpenSearch}>
-        <Feather name="search" size={28} color={colors.secondary} />
+        <Feather name="search" size={24} color={colors.secondary} />
       </TouchableOpacity>
 
       <TouchableOpacity onPress={onOpenFriends}>
-        <Feather name="users" size={28} color={colors.secondary} />
+        <Feather name="users" size={24} color={colors.secondary} />
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.camera_button}>
-        <CameraIcon size={28} color={colors.background} />
+        <CameraIcon size={24} color={colors.background} />
       </TouchableOpacity>
 
       <TouchableOpacity onPress={onOpenChatList}>
-        <ChatIcon size={28} color={colors.secondary} />
+        <ChatIcon size={24} color={colors.secondary} />
       </TouchableOpacity>
 
       <TouchableOpacity onPress={onOpenProfile}>
-        <Avatar size={28} />
+        <Avatar size={24} uri={userInfo?.avatar ?? null} />
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -52,11 +57,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    position: "absolute",
     borderRadius: 16,
-    gap: 30,
-    width: "80%",
-    height: 60,
+    gap: 32,
+    height: 50,
+    position: "absolute",
     bottom: "5%",
     left: "10%",
     right: "10%",
@@ -64,8 +68,7 @@ const styles = StyleSheet.create({
 
   camera_button: {
     backgroundColor: colors.primary,
-    width: 50,
-    height: 50,
+    padding: 8,
     borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",

@@ -46,6 +46,7 @@ const userSlice = createSlice({
         if (state.userInfo) {
           state.userInfo.username = action.payload.username ?? "";
           state.userInfo.fullName = action.payload.fullName ?? "";
+          state.userInfo.avatar = action.payload.avatar ?? null;
         }
       })
       .addCase(userUpdateInfo.rejected, (state, action) => {

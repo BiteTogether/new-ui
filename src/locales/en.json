@@ -104,5 +104,15 @@
 "change_role_success": "User role updated successfully.",
 "change_role_error": "Failed to update user role. Please try again.",
 "admin": "Admin",
-"member": "Member"
+"member": "Member",
+"change_avatar": "Change avatar",
+"delete_avatar": "Delete avatar",
+"delete_avatar_confirm": "Are you sure you want to delete your avatar?",
+"permission_required": "Permission required",
+"media_library_permission_required": "Permission to access the media library is required.",
+"no_avatar": "You don't have an avatar yet.",
+"language": "Language",
+"language_change_success": "Language changed successfully.",
+"english": "English",
+"vietnamese": "Vietnamese"
 }
