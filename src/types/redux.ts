@@ -1,5 +1,6 @@
 import { UserInfo } from "./user";
 import { ConversationsList } from "./chat";
+import { Posts } from "./feed";
 
 export interface AuthState {
   loading: boolean;
@@ -20,4 +21,11 @@ export interface ChatState {
   error: string | null;
   state: "IDLE" | "SENDING" | "SUCCESS" | "ERROR";
   conversations: ConversationsList | null;
+}
+
+export interface FeedState {
+  loading: boolean;
+  error: string | null;
+  posts: Posts;
+  savedPosts: Posts;
 }

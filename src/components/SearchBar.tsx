@@ -10,15 +10,38 @@ import { colors, fonts } from "../utils/constants";
 import { Feather } from "@expo/vector-icons";
 import debounce from "lodash.debounce";
 import { searchUsers } from "../services/api/userApi";
+import {
+  searchNearbyRestaurants,
+  searchRestaurant,
+} from "../services/api/mapApi";
 
 interface SearchBarProps {
   placeholder: string;
-  type?: "search_friends" | "search_map";
+  type?: "search_friends" | "search_map" | "search_nearby";
   setSearchResult: (result: any) => void;
+  hideIcon?: boolean;
+  value?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+  onChangeText?: (text: string) => void;
 }
 
-const SearchBar = ({ placeholder, type, setSearchResult }: SearchBarProps) => {
+const SearchBar = ({
+  placeholder,
+  type,
+  setSearchResult,
+  hideIcon,
+  value,
+  location,
+  onChangeText,
+}: SearchBarProps) => {
   const handleSearch = async (text: string) => {
+    if (!text.trim()) {
+      setSearchResult(null);
+      return;
+    }
     let res;
     try {
       if (type === "search_friends") {
@@ -26,8 +49,25 @@ const SearchBar = ({ placeholder, type, setSearchResult }: SearchBarProps) => {
         if (res.status === 200 && res.data) {
           setSearchResult(res.data);
         } else setSearchResult(null);
+      } else if (type === "search_nearby" && location) {
+        res = await searchNearbyRestaurants(
+          location.latitude,
+          location.longitude,
+          text.trim(),
+        );
+        if (res?.status === 200 && res.data) {
+          if (Array.isArray(res.data)) {
+            const filtered = res.data.filter((item) => item.distance <= 0.05);
+            setSearchResult(filtered);
+          } else {
+            setSearchResult([]);
+          }
+        } else setSearchResult(null);
       } else if (type === "search_map") {
-        // Search map logic here (if needed)
+        res = await searchRestaurant(text.trim());
+        if (res?.status === 200 && res.data) {
+          setSearchResult(res.data);
+        } else setSearchResult(null);
       } else {
         setSearchResult(text);
       }
@@ -52,12 +92,20 @@ const SearchBar = ({ placeholder, type, setSearchResult }: SearchBarProps) => {
         style={styles.input}
         placeholder={placeholder}
         placeholderTextColor={colors.secondary}
-        onChangeText={(text) => debouncedSearch(text)}
+        onChangeText={(text) => {
+          debouncedSearch(text);
+          if (onChangeText) {
+            onChangeText(text);
+          }
+        }}
         autoCapitalize="none"
+        value={value}
       />
-      <TouchableOpacity>
-        <Feather name="search" size={24} color={colors.secondary} />
-      </TouchableOpacity>
+      {!hideIcon && (
+        <TouchableOpacity>
+          <Feather name="search" size={24} color={colors.secondary} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

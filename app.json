@@ -59,6 +59,12 @@
           "androidGoogleMapsApiKey": "process.env.ANDROID_GOOGLE_MAPS_API_KEY",
           "iosGoogleMapsApiKey": "process.env.IOS_GOOGLE_MAPS_API_KEY"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "microphonePermission": false
+        }
       ]
     ],
     "extra": {

@@ -6,7 +6,7 @@ export type AuthStackParamList = {
 };
 
 export type MainStackParamList = {
-  Home: undefined;
+  Home: undefined | { postId: string };
   Chat: {
     // DIRECT
     id?: number;
@@ -26,4 +26,5 @@ export type MainStackParamList = {
   CreateGroupChat: undefined;
   GroupDetail: { conversationId: string };
   AddMember: { ids: number[] };
+  CreatePost: { imageUri: string; latitude: number; longitude: number };
 };
