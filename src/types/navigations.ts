@@ -25,6 +25,6 @@ export type MainStackParamList = {
   SystemSettings: undefined;
   CreateGroupChat: undefined;
   GroupDetail: { conversationId: string };
-  AddMember: { ids: number[] };
+  AddMember: { conversationId: string; ids: number[] };
   CreatePost: { imageUri: string; latitude: number; longitude: number };
 };

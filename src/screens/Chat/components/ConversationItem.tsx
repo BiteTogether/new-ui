@@ -38,6 +38,18 @@ const ConversationItem = ({
     return "";
   };
 
+  const avatarUrl = () => {
+    if (conversationItem.type === "GROUP") {
+      return conversationItem.avatarUrl;
+    } else if (conversationItem.type === "DIRECT") {
+      const otherUser = conversationItem.participants.find(
+        (p) => p.chatUserSnapshot.userId !== userInfo?.id,
+      );
+      return otherUser?.chatUserSnapshot.avatar || "";
+    }
+    return "";
+  };
+
   const handleOpenChat = () => {
     if (conversationItem.type === "DIRECT") {
       const otherUser = conversationItem.participants.find(
@@ -68,7 +80,7 @@ const ConversationItem = ({
       onPress={() => handleOpenChat()}
       onLongPress={() => onLongPress(conversationItem.id)}
     >
-      <Avatar />
+      <Avatar uri={avatarUrl()} />
       <View style={styles.info_container}>
         <Text style={styles.username_text}>{conversationName()}</Text>
         <View style={styles.message_container}>

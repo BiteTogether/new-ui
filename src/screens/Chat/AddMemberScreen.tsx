@@ -16,11 +16,12 @@ import { getFriendsList } from "../../services/api/friendsApi";
 import Avatar from "../../components/Avatar";
 import { Feather } from "@expo/vector-icons";
 import { truncateText } from "../../utils/helpers";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MainStackParamList } from "../../types/navigations";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../../store";
+import { userAddMembersToConversation } from "../../store/chat/chatActions";
 
 import Toast from "react-native-toast-message";
 
@@ -28,11 +29,12 @@ const AddMemberScreen = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
   const [friendsList, setFriendsList] = useState<FriendsListResponse>([]);
-
   const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const dispatch = useDispatch<AppDispatch>();
   const { loading } = useSelector((state: RootState) => state.chat);
+  const route = useRoute<RouteProp<MainStackParamList, "AddMember">>();
+  const { conversationId, ids } = route.params;
 
   const handleLoadMore = async () => {
     // Implement pagination if needed
@@ -55,13 +57,12 @@ const AddMemberScreen = () => {
       return;
     }
     try {
-      //   await dispatch(
-      //     userCreateConversation({
-      //       type: "GROUP",
-      //       name: trimmedGroupName,
-      //       participantIds: selectedMembers,
-      //     }),
-      //   ).unwrap();
+      await dispatch(
+        userAddMembersToConversation({
+          conversationId: conversationId,
+          userIds: selectedMembers,
+        }),
+      ).unwrap();
       Toast.show({
         type: "success",
         text1: t("add_member_success"),
@@ -124,7 +125,7 @@ const AddMemberScreen = () => {
                   gap: 8,
                 }}
               >
-                <Avatar />
+                <Avatar uri={item.avatar} />
                 <View style={styles.username_container}>
                   <Text style={styles.fullName_text}>
                     {truncateText(item.fullName, 8)}
@@ -140,15 +141,17 @@ const AddMemberScreen = () => {
       </View>
 
       <FlatList
-        data={friendsList.filter(
-          (friend) =>
-            friend.fullName
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase().trim()) ||
-            friend.username
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase().trim()),
-        )}
+        data={friendsList
+          .filter((friend) => !ids.includes(friend.id))
+          .filter(
+            (friend) =>
+              friend.fullName
+                ?.toLowerCase()
+                .includes(searchText.toLowerCase().trim()) ||
+              friend.username
+                ?.toLowerCase()
+                .includes(searchText.toLowerCase().trim()),
+          )}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
         onEndReached={handleLoadMore}
@@ -164,7 +167,7 @@ const AddMemberScreen = () => {
             onPress={() => handleSelectMember(item.id)}
           >
             <View style={styles.user_container}>
-              <Avatar />
+              <Avatar uri={item.avatar} />
               <View style={styles.username_container}>
                 <Text style={styles.fullName_text}>
                   {truncateText(item.fullName, 20)}

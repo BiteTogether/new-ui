@@ -19,7 +19,7 @@ const UserInfo = ({ onPress, isDisabled, userInfo }: UserInfoProps) => {
       onPress={onPress}
       disabled={isDisabled}
     >
-      <Avatar size={40} />
+      <Avatar uri={userInfo?.avatar} size={40} />
       <Text style={styles.username_text}>
         {truncateText(userInfo?.fullName || "", 20)}
       </Text>

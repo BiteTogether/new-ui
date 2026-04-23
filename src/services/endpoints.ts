@@ -35,12 +35,13 @@ export const API_ENDPOINTS = {
       DELETE: "/api/v1/conversations/{conversationId}",
       GET_LIST: "/api/v1/conversations",
       CREATE: "/api/v1/conversations",
-      ADD_USER: "/api/v1/conversations/{conversationId}/participants/{userId}",
+      ADD_USER: "/api/v1/conversations/{conversationId}/participants",
       REMOVE_USER:
         "/api/v1/conversations/{conversationId}/participants/{userId}",
       UPDATE_ROLE:
         "/api/v1/conversations/{conversationId}/participants/{userId}/role",
       GET_BY_ID: "/api/v1/conversations/{conversationId}",
+      UPLOAD_AVATAR: "/api/v1/conversations/{conversationId}/avatar",
     },
     MESSAGES: {
       UPDATE: "/api/v1/messages/{messageId}",

@@ -11,6 +11,7 @@ import {
   updateConversation,
   removeUserFromConversation,
   updateUserRoleInConversation,
+  addUserToConversation,
 } from "../../services/api/chatApi";
 import {
   SendMessageRequest,
@@ -87,7 +88,7 @@ export const userGetConversationById = createAsyncThunk(
   async (conversationId: string, { rejectWithValue }) => {
     try {
       const response = await getConversationById(conversationId);
-      if (response.status === 200) {
+      if (response.status === 200 && response.data) {
         return response.data;
       }
       return rejectWithValue(response.message);
@@ -104,21 +105,13 @@ export const userGetConversationById = createAsyncThunk(
 export const userUpdateConversation = createAsyncThunk(
   "chat/updateConversation",
   async (
-    {
-      conversationId,
-      name,
-      avatarUrl,
-    }: { conversationId: string; name: string; avatarUrl?: string },
+    { conversationId, name }: { conversationId: string; name: string },
 
     { rejectWithValue },
   ) => {
     try {
-      const response = await updateConversation(
-        conversationId,
-        name,
-        avatarUrl,
-      );
-      if (response.status === 200) {
+      const response = await updateConversation(conversationId, name);
+      if (response.status === 200 && response.data) {
         return response.data;
       }
       return rejectWithValue(response.message);
@@ -151,12 +144,34 @@ export const userRemoveMemberFromConversation = createAsyncThunk(
   },
 );
 
+export const userAddMembersToConversation = createAsyncThunk(
+  "chat/addMembersToConversation",
+  async (
+    { conversationId, userIds }: { conversationId: string; userIds: number[] },
+    { rejectWithValue },
+  ) => {
+    try {
+      const response = await addUserToConversation(conversationId, userIds);
+      if (response.status === 201 && response.data) {
+        return response.data;
+      }
+      return rejectWithValue(response.message);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  },
+);
+
 export const userUpdateRoleInConversation = createAsyncThunk(
   "chat/updateUserRoleInConversation",
   async (data: UserConversationRequest, { rejectWithValue }) => {
     try {
       const response = await updateUserRoleInConversation(data);
-      if (response.status === 200) {
+      if (response.status === 200 && response.data) {
         return response.data;
       }
       return rejectWithValue(response.message);

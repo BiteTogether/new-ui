@@ -11,6 +11,7 @@ import {
   userUpdateConversation,
   userRemoveMemberFromConversation,
   userUpdateRoleInConversation,
+  userAddMembersToConversation,
 } from "./chatActions";
 import { ChatState } from "../../types/redux";
 
@@ -135,6 +136,21 @@ const chatSlice = createSlice({
         state.error = null;
       })
       .addCase(userRemoveMemberFromConversation.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Add members to conversation
+    builder
+      .addCase(userAddMembersToConversation.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userAddMembersToConversation.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userAddMembersToConversation.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

@@ -10,6 +10,7 @@ import {
   SendMessageRequest,
   MessagesList,
 } from "../../types/chat";
+import { UploadImage } from "../../types/user";
 
 // Conversation
 export const getConversation = (conversationId: string) => {
@@ -20,16 +21,12 @@ export const getConversation = (conversationId: string) => {
   return apiService.get<Conversation>(endpoint);
 };
 
-export const updateConversation = (
-  conversationId: string,
-  name: string,
-  avatarUrl?: string,
-) => {
+export const updateConversation = (conversationId: string, name: string) => {
   const endpoint = API_ENDPOINTS.CHAT.CONVERSATIONS.UPDATE.replace(
     "{conversationId}",
     conversationId,
   );
-  return apiService.put<Conversation>(endpoint, { name, avatarUrl });
+  return apiService.put<Conversation>(endpoint, { name });
 };
 
 export const deleteConversation = (conversationId: string) => {
@@ -54,12 +51,15 @@ export const createConversation = (data: CreateConversationRequest) => {
   );
 };
 
-export const addUserToConversation = (data: UserConversationRequest) => {
+export const addUserToConversation = (
+  conversationId: string,
+  userIds: number[],
+) => {
   const endpoint = API_ENDPOINTS.CHAT.CONVERSATIONS.ADD_USER.replace(
     "{conversationId}",
-    data.conversationId,
-  ).replace("{userId}", data.userId.toString());
-  return apiService.post<AddUserToConversationResponse>(endpoint);
+    conversationId,
+  );
+  return apiService.post<AddUserToConversationResponse>(endpoint, { userIds });
 };
 
 export const removeUserFromConversation = (data: UserConversationRequest) => {
@@ -119,4 +119,17 @@ export const getMessagesList = (
   return apiService.get<MessagesList>(endpoint, {
     params: { cursor, limit },
   });
+};
+
+export const uploadConversationAvatar = (
+  conversationId: string,
+  avatarFile: UploadImage,
+) => {
+  const endpoint = API_ENDPOINTS.CHAT.CONVERSATIONS.UPLOAD_AVATAR.replace(
+    "{conversationId}",
+    conversationId.toString(),
+  );
+  const formData = new FormData();
+  formData.append("file", avatarFile as any);
+  return apiService.uploadFile(endpoint, formData);
 };
