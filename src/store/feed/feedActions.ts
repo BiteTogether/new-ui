@@ -61,7 +61,7 @@ export const userGetPostByUserId = createAsyncThunk(
     try {
       const response = await getPostByUserId(userId, params);
       if (response.status === 200 && response.data) {
-        return response.data;
+        return response;
       }
       return rejectWithValue(response.message);
     } catch (error: any) {
