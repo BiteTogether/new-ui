@@ -8,6 +8,7 @@ import {
   FlatList,
   Dimensions,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { colors, fonts } from "../../utils/constants";
@@ -32,7 +33,6 @@ import { Posts } from "../../types/feed";
 const ProfileScreen = () => {
   const { t } = useTranslation();
   const { userInfo } = useSelector((state: RootState) => state.user);
-  const { loading } = useSelector((state: RootState) => state.feed);
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
   const dispatch = useDispatch<AppDispatch>();
   const route = useRoute<RouteProp<MainStackParamList, "Profile">>();
@@ -42,6 +42,10 @@ const ProfileScreen = () => {
   const [showSelectModal, setShowSelectModal] = useState<boolean>(false);
   const [showRemoveModal, setShowRemoveModal] = useState<boolean>(false);
   const [posts, setPosts] = useState<Posts>([]);
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [isFetchingPosts, setIsFetchingPosts] = useState<boolean>(false);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
 
   const numColumns = 3;
   const imageMargin = 2;
@@ -85,7 +89,30 @@ const ProfileScreen = () => {
     }
   };
 
-  const handleLoadMorePosts = () => {};
+  const handleLoadMorePosts = async () => {
+    if (isLoadingMore) return;
+    setIsLoadingMore(true);
+    try {
+      if (currentPage < totalPages) {
+        const res = await dispatch(
+          userGetPostByUserId({
+            userId: id,
+            params: { page: currentPage + 1 },
+          }),
+        ).unwrap();
+        setPosts((prevPosts) => [...prevPosts, ...(res.data ?? [])]);
+        setCurrentPage(res.currentPage as number);
+      }
+    } catch (error) {
+      console.error("Error loading more posts:", error);
+      Toast.show({
+        type: "error",
+        text1: t("error_occurred"),
+      });
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   useEffect(() => {
     const fetchUserInfo = async (id: number) => {
@@ -110,15 +137,20 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     const fetchPostsByUserId = async (userId: number) => {
+      setIsFetchingPosts(true);
       try {
         const res = await dispatch(userGetPostByUserId({ userId })).unwrap();
-        setPosts(res);
+        setPosts(res.data as Posts);
+        setCurrentPage(res.currentPage as number);
+        setTotalPages(res.totalPages as number);
       } catch (error) {
         console.error("Error fetching posts by user ID:", error);
         Toast.show({
           type: "error",
           text1: t("error_occurred"),
         });
+      } finally {
+        setIsFetchingPosts(false);
       }
     };
 
@@ -129,7 +161,7 @@ const ProfileScreen = () => {
     if (userInfo?.id === id) setUser(userInfo);
   }, [userInfo]);
 
-  if (isLoading || loading) return <Loading />;
+  if (isLoading || isFetchingPosts) return <Loading />;
 
   return (
     <View style={styles.container}>
@@ -195,6 +227,18 @@ const ProfileScreen = () => {
           <Text style={styles.no_result_text}>{t("no_posts")}</Text>
         }
       />
+
+      {isLoadingMore && (
+        <View
+          style={{
+            padding: 24,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      )}
 
       <SelectModal
         visible={showSelectModal}

@@ -10,5 +10,5 @@ export interface ApiResponse<T> {
 
 export interface GetListParams {
   page: number;
-  size: number;
+  size?: number;
 }
