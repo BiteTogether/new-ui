@@ -6,6 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../types/navigations";
 import LogoIcon from "../../../assets/icons/LogoIcon";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const LoginScreen = () => {
   const { t } = useTranslation();
@@ -34,13 +35,13 @@ const LoginScreen = () => {
         </Text>
       </View>
 
-      <View style={styles.privacy_container}>
+      <SafeAreaView style={styles.privacy_container}>
         <Text style={styles.subsubtitle}>{t("tapping_get_started")}</Text>
         <Text style={styles.subsubtitle}>{t("privacy_policy")}</Text>
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>{t("get_started")}</Text>
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
     </View>
   );
 };

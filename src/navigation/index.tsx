@@ -29,6 +29,7 @@ import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import websocketService from "../services/webSocketService";
 import { AppState } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Stack = createNativeStackNavigator();
 
@@ -36,7 +37,7 @@ export default function Navigation() {
   const { isSignedIn } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
   const { loadingToken, token } = useSelector((state: RootState) => state.auth);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const handleGetInfo = async () => {
     const resultAction = await dispatch(userGetInfo());
     if (userGetInfo.rejected.match(resultAction)) {
@@ -47,6 +48,12 @@ export default function Navigation() {
       });
     }
   };
+
+  useEffect(() => {
+    AsyncStorage.getItem("appLanguage").then((lang) => {
+      if (lang) i18n.changeLanguage(lang);
+    });
+  }, []);
 
   useEffect(() => {
     dispatch(loadToken());

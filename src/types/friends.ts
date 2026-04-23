@@ -2,7 +2,7 @@ export interface FriendItem {
   id: number;
   username: string;
   fullName: string;
-  avatar: string;
+  avatar: string | null;
   conversationId: string | null;
 }
 export type FriendsListResponse = FriendItem[];
@@ -13,7 +13,7 @@ export interface FriendRequestItem {
     id: number;
     username: string;
     fullName: string;
-    avatar: string;
+    avatar: string | null;
   };
 }
 export type FriendRequestsResponse = FriendRequestItem[];

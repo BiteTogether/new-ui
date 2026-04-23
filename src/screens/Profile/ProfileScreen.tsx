@@ -15,6 +15,7 @@ import { removeFriend } from "../../services/api/friendsApi";
 import ConfirmModal from "../../components/ConfirmModal";
 import SelectModal, { Option } from "../../components/SelectModal";
 import Toast from "react-native-toast-message";
+import { truncateText } from "../../utils/helpers";
 
 const ProfileScreen = () => {
   const { t } = useTranslation();
@@ -97,7 +98,7 @@ const ProfileScreen = () => {
           />
           <View style={styles.info_container}>
             <Avatar size={80} />
-            <Text style={styles.title}>{user?.fullName}</Text>
+            <Text style={styles.title}>{truncateText(user?.fullName, 15)}</Text>
           </View>
         </>
       ) : (
