@@ -14,6 +14,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { MainStackParamList } from "../../types/navigations";
 import ConfirmModal from "../../components/ConfirmModal";
 import Toast from "react-native-toast-message";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const SettingsScreen = () => {
   const { t } = useTranslation();
@@ -96,14 +97,14 @@ const SettingsScreen = () => {
         />
       </View>
 
-      <View style={styles.button_logout_container}>
+      <SafeAreaView style={styles.button_logout_container}>
         <TouchableOpacity
           style={styles.button}
           onPress={() => setShowLogoutModal(true)}
         >
           <Text style={styles.buttonText}>{t("logout")}</Text>
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
       <ConfirmModal
         visible={showLogoutModal}
         title={t("logout")}

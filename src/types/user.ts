@@ -13,8 +13,8 @@ export interface UserInfo {
   username: string;
   fullName: string;
   phoneNumber: string;
-  avatar: string;
-  role: string;
+  avatar: string | null;
+  role: "USER" | "ADMIN";
   createdAt: string;
   updatedAt: string;
   foodPreferences: string;
@@ -29,7 +29,7 @@ export interface FriendInfo {
   username: string;
   fullName: string;
   phoneNumber: string;
-  avatar: string;
+  avatar: string | null;
   createdAt: string;
   updatedAt: string;
   friendItem: {
@@ -46,10 +46,16 @@ export interface SearchFriendResponse {
   id: number;
   username: string;
   fullName: string;
-  avatar: string;
+  avatar: string | null;
   hasFriendRequestSent: boolean;
   hasFriendRequestReceived: boolean;
   friendRequestId: number;
   isFriend: boolean;
   conversationId: string | null;
+}
+
+export interface UploadImage {
+  uri: string;
+  name: string;
+  type: string;
 }

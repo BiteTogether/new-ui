@@ -91,7 +91,7 @@ const TopBar = ({
             <ChatIcon />
           </TouchableOpacity>
         )}
-        {onPressOption && (
+        {onPressOption && type !== "myProfile" && (
           <TouchableOpacity onPress={onPressOption}>
             <Feather name="more-horizontal" size={24} color={colors.text} />
           </TouchableOpacity>

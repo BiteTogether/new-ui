@@ -5,6 +5,7 @@ import {
   ValidateResponse,
   UserInfo,
   SearchFriendResponse,
+  UploadImage,
 } from "../../types/user";
 
 export const validateInfo = (data: ValidateRequest) => {
@@ -19,12 +20,17 @@ export const updateMyInfo = (
   id: number,
   username: string,
   fullName: string,
+  avatar: string | null,
 ) => {
   const endpoint = API_ENDPOINTS.USER.MY_INFO.UPDATE.replace(
     "{id}",
     id.toString(),
   );
-  return apiService.put<Partial<UserInfo>>(endpoint, { username, fullName });
+  return apiService.put<Partial<UserInfo>>(endpoint, {
+    username,
+    fullName,
+    avatar,
+  });
 };
 
 export const deleteMyInfo = (id: number) => {
@@ -55,22 +61,20 @@ export const getUsersByIds = (userIds: number[]) => {
   });
 };
 
-// export const uploadAvatar = (id: number, avatarFile: File) => {
-//   const endpoint = API_ENDPOINTS.USER.MY_INFO.UPLOAD_AVATAR.replace(
-//     "{id}",
-//     id.toString(),
-//   );
-//   const formData = new FormData();
-//   formData.append("avatar", avatarFile);
-//   return apiService.post(endpoint, formData, {
-//     headers: { "Content-Type": "multipart/form-data" },
-//   });
-// };
+export const uploadAvatar = (id: number, avatarFile: UploadImage) => {
+  const endpoint = API_ENDPOINTS.USER.MY_INFO.UPLOAD_AVATAR.replace(
+    "{id}",
+    id.toString(),
+  );
+  const formData = new FormData();
+  formData.append("file", avatarFile as any);
+  return apiService.uploadFile(endpoint, formData);
+};
 
-// export const deleteAvatar = (id: number) => {
-//   const endpoint = API_ENDPOINTS.USER.MY_INFO.DELETE_AVATAR.replace(
-//     "{id}",
-//     id.toString(),
-//   );
-//   return apiService.delete(endpoint);
-// };
+export const deleteAvatar = (id: number) => {
+  const endpoint = API_ENDPOINTS.USER.MY_INFO.DELETE_AVATAR.replace(
+    "{id}",
+    id.toString(),
+  );
+  return apiService.delete(endpoint);
+};

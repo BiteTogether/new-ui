@@ -7,6 +7,7 @@ const colors = {
   error: "#F44336",
   cancel: "#2196F3",
   neutral: "#EEEEEE",
+  pink: "#FF69B4",
 };
 
 const fonts = {

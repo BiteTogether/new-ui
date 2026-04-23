@@ -16,6 +16,7 @@ import SystemSettingsScreen from "../screens/Settings/SystemSettingsScreen";
 import CreateGroupChatScreen from "../screens/Chat/CreateGroupChatScreen";
 import GroupDetailScreen from "../screens/Chat/GroupDetailScreen";
 import AddMemberScreen from "../screens/Chat/AddMemberScreen";
+import CreatePostScreen from "../screens/Feed/CreatePostScreen";
 
 import { useSelector, useDispatch } from "react-redux";
 import { loadToken } from "../store/auth/authSlice";
@@ -29,6 +30,7 @@ import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import websocketService from "../services/webSocketService";
 import { AppState } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Stack = createNativeStackNavigator();
 
@@ -36,7 +38,7 @@ export default function Navigation() {
   const { isSignedIn } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
   const { loadingToken, token } = useSelector((state: RootState) => state.auth);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const handleGetInfo = async () => {
     const resultAction = await dispatch(userGetInfo());
     if (userGetInfo.rejected.match(resultAction)) {
@@ -47,6 +49,12 @@ export default function Navigation() {
       });
     }
   };
+
+  useEffect(() => {
+    AsyncStorage.getItem("appLanguage").then((lang) => {
+      if (lang) i18n.changeLanguage(lang);
+    });
+  }, []);
 
   useEffect(() => {
     dispatch(loadToken());
@@ -123,6 +131,7 @@ export default function Navigation() {
             />
             <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
             <Stack.Screen name="AddMember" component={AddMemberScreen} />
+            <Stack.Screen name="CreatePost" component={CreatePostScreen} />
           </>
         ) : (
           <>

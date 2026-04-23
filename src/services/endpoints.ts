@@ -49,4 +49,22 @@ export const API_ENDPOINTS = {
       GET_LIST: "/api/v1/messages/conversation/{conversationId}",
     },
   },
+  FEED: {
+    POST: {
+      CREATE: "/api/v1/feeds",
+      GET: "/api/v1/feeds/new-feeds",
+      DELETE: "/api/v1/feeds/{id}",
+      GET_BY_ID: "/api/v1/feeds/{id}",
+      GET_BY_USERID: "/api/v1/feeds/user/{userId}",
+      UPLOAD_IMAGE: "/api/v1/feeds/upload-image",
+    },
+    LIKE: {
+      LIKE: "/api/v1/feeds/likes",
+    },
+    SAVE: {
+      SAVE: "/api/v1/feeds/saved-posts/{postId}",
+      GET: "/api/v1/feeds/saved-posts",
+      DELETE: "/api/v1/feeds/saved-posts/{postId}",
+    },
+  },
 };
