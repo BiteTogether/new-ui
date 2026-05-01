@@ -12,6 +12,16 @@ import {
   userRemoveMemberFromConversation,
   userUpdateRoleInConversation,
   userAddMembersToConversation,
+  userCreateVoteSession,
+  userCloseVoteSession,
+  userCastVote,
+  userGetVoteSessions,
+  userGetVoteSessionById,
+  userCreateBillSession,
+  userConfirmBillPayment,
+  userFinalizeBillSession,
+  userGetBillSessions,
+  userGetBillSessionById,
 } from "./chatActions";
 import { ChatState } from "../../types/redux";
 
@@ -221,6 +231,138 @@ const chatSlice = createSlice({
         state.error = null;
       })
       .addCase(userUpdateMessage.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Create vote session actions
+    builder
+      .addCase(userCreateVoteSession.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(userCreateVoteSession.fulfilled, (state) => {
+        state.error = null;
+      })
+      .addCase(userCreateVoteSession.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Close vote session actions
+    builder
+      .addCase(userCloseVoteSession.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(userCloseVoteSession.fulfilled, (state) => {
+        state.error = null;
+      })
+      .addCase(userCloseVoteSession.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Cast vote actions
+    builder
+      .addCase(userCastVote.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(userCastVote.fulfilled, (state) => {
+        state.error = null;
+      })
+      .addCase(userCastVote.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Get vote sessions actions
+    builder
+      .addCase(userGetVoteSessions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userGetVoteSessions.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userGetVoteSessions.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Get vote session by ID actions
+    builder
+      .addCase(userGetVoteSessionById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userGetVoteSessionById.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userGetVoteSessionById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Create bill session actions
+    builder
+      .addCase(userCreateBillSession.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(userCreateBillSession.fulfilled, (state) => {
+        state.error = null;
+      })
+      .addCase(userCreateBillSession.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Confirm bill payment actions
+    builder
+      .addCase(userConfirmBillPayment.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(userConfirmBillPayment.fulfilled, (state) => {
+        state.error = null;
+      })
+      .addCase(userConfirmBillPayment.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Finalize bill session actions
+    builder
+      .addCase(userFinalizeBillSession.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(userFinalizeBillSession.fulfilled, (state) => {
+        state.error = null;
+      })
+      .addCase(userFinalizeBillSession.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Get bill sessions actions
+    builder
+      .addCase(userGetBillSessions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userGetBillSessions.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userGetBillSessions.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Get bill session by ID actions
+    builder
+      .addCase(userGetBillSessionById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userGetBillSessionById.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userGetBillSessionById.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload as string;
       });
   },

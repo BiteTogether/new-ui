@@ -8,6 +8,9 @@ const colors = {
   cancel: "#2196F3",
   neutral: "#EEEEEE",
   pink: "#FF69B4",
+  green: "#2ecc40",
+  mint_green: "#eafaf1",
+  orange: "#e67e22",
 };
 
 const fonts = {

@@ -12,11 +12,23 @@ import {
   removeUserFromConversation,
   updateUserRoleInConversation,
   addUserToConversation,
+  createVoteSession,
+  closeVoteSession,
+  castVote,
+  getVoteSessions,
+  getVoteSessionById,
+  createBillSession,
+  confirmBillPayment,
+  finalizeBillSession,
+  getBillSessions,
+  getBillSessionById,
 } from "../../services/api/chatApi";
 import {
   SendMessageRequest,
   CreateConversationRequest,
   UserConversationRequest,
+  CreateVoteRequest,
+  CreateBillRequest,
 } from "../../types/chat";
 
 // Conversations
@@ -258,6 +270,204 @@ export const userUpdateMessage = createAsyncThunk(
   ) => {
     try {
       const response = await updateMessage(messageId, content);
+      if (response.status === 200 && response.data) {
+        return response.data;
+      }
+      return rejectWithValue(response.message);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  },
+);
+
+// Vote
+export const userCreateVoteSession = createAsyncThunk(
+  "chat/createVoteSession",
+  async (data: CreateVoteRequest, { rejectWithValue }) => {
+    try {
+      const response = await createVoteSession(data);
+      if (response.status === 201 && response.data) {
+        return response.data;
+      }
+      return rejectWithValue(response.message);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  },
+);
+
+export const userCloseVoteSession = createAsyncThunk(
+  "chat/closeVoteSession",
+  async (voteSessionId: string, { rejectWithValue }) => {
+    try {
+      const response = await closeVoteSession(voteSessionId);
+      if (response.status === 200 && response.data) {
+        return response.data;
+      }
+      return rejectWithValue(response.message);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  },
+);
+
+export const userCastVote = createAsyncThunk(
+  "chat/castVote",
+  async (
+    { voteSessionId, optionId }: { voteSessionId: string; optionId: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const response = await castVote(voteSessionId, optionId);
+      if (response.status === 200 && response.data) {
+        return response.data;
+      }
+      return rejectWithValue(response.message);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  },
+);
+
+export const userGetVoteSessions = createAsyncThunk(
+  "chat/getVoteSession",
+  async (conversationId: string, { rejectWithValue }) => {
+    try {
+      const response = await getVoteSessions(conversationId);
+      if (response.status === 200 && response.data) {
+        return response.data;
+      }
+      return rejectWithValue(response.message);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  },
+);
+
+export const userGetVoteSessionById = createAsyncThunk(
+  "chat/getVoteSessionById",
+  async (voteSessionId: string, { rejectWithValue }) => {
+    try {
+      const response = await getVoteSessionById(voteSessionId);
+      if (response.status === 200 && response.data) {
+        return response.data;
+      }
+      return rejectWithValue(response.message);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  },
+);
+
+// Bill
+export const userCreateBillSession = createAsyncThunk(
+  "chat/createBillSession",
+  async (data: CreateBillRequest, { rejectWithValue }) => {
+    try {
+      const response = await createBillSession(data);
+      if (response.status === 201 && response.data) {
+        return response.data;
+      }
+      return rejectWithValue(response.message);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  },
+);
+
+export const userConfirmBillPayment = createAsyncThunk(
+  "chat/confirmBillPayment",
+  async (
+    { billSessionId, userId }: { billSessionId: string; userId: number },
+    { rejectWithValue },
+  ) => {
+    try {
+      const response = await confirmBillPayment(billSessionId, userId);
+      if (response.status === 200 && response.data) {
+        return response.data;
+      }
+      return rejectWithValue(response.message);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  },
+);
+
+export const userFinalizeBillSession = createAsyncThunk(
+  "chat/finalizeBillSession",
+  async (billSessionId: string, { rejectWithValue }) => {
+    try {
+      const response = await finalizeBillSession(billSessionId);
+      if (response.status === 200 && response.data) {
+        return response.data;
+      }
+      return rejectWithValue(response.message);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  },
+);
+
+export const userGetBillSessions = createAsyncThunk(
+  "chat/getBillSessions",
+  async (conversationId: string, { rejectWithValue }) => {
+    try {
+      const response = await getBillSessions(conversationId);
+      if (response.status === 200 && response.data) {
+        return response.data;
+      }
+      return rejectWithValue(response.message);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  },
+);
+
+export const userGetBillSessionById = createAsyncThunk(
+  "chat/getBillSessionById",
+  async (billSessionId: string, { rejectWithValue }) => {
+    try {
+      const response = await getBillSessionById(billSessionId);
       if (response.status === 200 && response.data) {
         return response.data;
       }

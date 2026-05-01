@@ -26,6 +26,7 @@ interface SearchBarProps {
     longitude: number;
   };
   onChangeText?: (text: string) => void;
+  textColor?: string;
 }
 
 const SearchBar = ({
@@ -36,6 +37,7 @@ const SearchBar = ({
   value,
   location,
   onChangeText,
+  textColor = colors.text,
 }: SearchBarProps) => {
   const handleSearch = async (text: string) => {
     if (!text.trim()) {
@@ -89,7 +91,7 @@ const SearchBar = ({
   return (
     <View style={styles.container}>
       <TextInput
-        style={styles.input}
+        style={[styles.input, { color: textColor }]}
         placeholder={placeholder}
         placeholderTextColor={colors.secondary}
         onChangeText={(text) => {
@@ -124,7 +126,6 @@ const styles = StyleSheet.create({
   },
 
   input: {
-    color: colors.text,
     fontSize: fonts.size.medium,
     paddingHorizontal: 8,
     paddingVertical: Platform.OS === "ios" ? 10 : undefined,

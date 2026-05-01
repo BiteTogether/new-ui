@@ -49,6 +49,20 @@ export const API_ENDPOINTS = {
       SEND: "/api/v1/messages",
       GET_LIST: "/api/v1/messages/conversation/{conversationId}",
     },
+    VOTE: {
+      CREATE: "/api/v1/votes",
+      CLOSE: "/api/v1/votes/{voteSessionId}/close",
+      CAST: "/api/v1/votes/{voteSessionId}/cast",
+      GET: "/api/v1/votes/conversation/{conversationId}",
+      GET_BY_ID: "/api/v1/votes/{voteSessionId}",
+    },
+    BILL: {
+      CREATE: "/api/v1/bills",
+      CONFIRM_PAYMENT: "/api/v1/bills/{billSessionId}/payments",
+      FINALIZE: "/api/v1/bills/{billSessionId}/finalize",
+      GET: "/api/v1/bills/conversation/{conversationId}",
+      GET_BY_ID: "/api/v1/bills/{billSessionId}",
+    },
   },
   FEED: {
     POST: {

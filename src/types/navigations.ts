@@ -27,4 +27,6 @@ export type MainStackParamList = {
   GroupDetail: { conversationId: string };
   AddMember: { conversationId: string; ids: number[] };
   CreatePost: { imageUri: string; latitude: number; longitude: number };
+  VoteResults: { conversationId: string };
+  BillResults: { conversationId: string };
 };

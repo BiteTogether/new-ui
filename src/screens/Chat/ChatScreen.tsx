@@ -14,7 +14,7 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MainStackParamList } from "../../types/navigations";
 import { useTranslation } from "react-i18next";
-import { colors, fonts } from "../../utils/constants";
+import { colors } from "../../utils/constants";
 import { Feather } from "@expo/vector-icons";
 import MessageInput from "../../components/MessageInput";
 import TopBar from "../../components/TopBar";
@@ -25,14 +25,32 @@ import {
   userDeleteMessage,
   userUpdateMessage,
   userCreateConversation,
+  userCreateVoteSession,
+  userGetVoteSessions,
+  userCreateBillSession,
+  userConfirmBillPayment,
+  userFinalizeBillSession,
+  userGetBillSessions,
 } from "../../store/chat/chatActions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../../store";
-import { MessagesList, Message } from "../../types/chat";
+import {
+  MessagesList,
+  Message,
+  VoteList,
+  CreateBillRequest,
+  BillList,
+} from "../../types/chat";
 import Toast from "react-native-toast-message";
 import MessageItem from "./components/MessageItem";
 import SelectModal, { Option } from "../../components/SelectModal";
 import ConfirmModal from "../../components/ConfirmModal";
+import VoteOptionList from "./components/VoteOptionList";
+import CreateVoteModal from "./components/CreateVoteModal";
+import VoteStickyBar from "./components/VoteStickyBar";
+import BillStickyBar from "./components/BillStickyBar";
+import CreateBillModal from "./components/CreateBillModal";
+import BillDetailModal from "./components/BillDetailModal";
 
 const ChatScreen = () => {
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
@@ -40,11 +58,14 @@ const ChatScreen = () => {
   const route = useRoute<RouteProp<MainStackParamList, "Chat">>();
   const { id, username, fullName, avatar, conversationId, type, name } =
     route.params;
-  const { messages, isConnected } = useWebSocket("SEND");
+  const { messages, isConnected } = useWebSocket("SEND") as {
+    messages: Message[];
+    isConnected: boolean;
+  };
+  const { votes } = useWebSocket("VOTE_UPDATE") as { votes: VoteList };
+  const { bills } = useWebSocket("BILL_UPDATE") as { bills: BillList };
   const dispatch = useDispatch<AppDispatch>();
-  const { state, conversations } = useSelector(
-    (state: RootState) => state.chat,
-  );
+  const { conversations } = useSelector((state: RootState) => state.chat);
   const { userInfo } = useSelector((state: RootState) => state.user);
   const [messagesList, setMessagesList] = useState<MessagesList>({
     messages: messages,
@@ -59,6 +80,15 @@ const ChatScreen = () => {
   const [isUpdatingMode, setIsUpdatingMode] = useState<boolean>(false);
   const [updateContent, setUpdateContent] = useState<string>("");
   const [conId, setConId] = useState<string | null>(conversationId);
+  const [showPlusModal, setShowPlusModal] = useState<boolean>(false);
+  const [showCreateVoteModal, setShowCreateVoteModal] =
+    useState<boolean>(false);
+  const [showCreateBillModal, setShowCreateBillModal] =
+    useState<boolean>(false);
+  const [voteSessions, setVoteSessions] = useState<VoteList>(votes);
+  const [billSessions, setBillSessions] = useState<BillList>(bills);
+  const [selectedPollId, setSelectedPollId] = useState<string | null>(null);
+  const [selectedBillId, setSelectedBillId] = useState<string | null>(null);
 
   const [behaviour, setBehaviour] = useState<"height" | undefined>("height");
   useEffect(() => {
@@ -92,6 +122,102 @@ const ChatScreen = () => {
       },
     },
   ];
+
+  const plusOptions: Option[] = [
+    {
+      label: t("create_vote"),
+      onPress: () => {
+        setShowPlusModal(false);
+        setShowCreateVoteModal(true);
+      },
+    },
+    {
+      label: t("create_bill"),
+      onPress: () => {
+        setShowPlusModal(false);
+        setShowCreateBillModal(true);
+      },
+    },
+    {
+      label: t("view_vote_results"),
+      onPress: () => {
+        setShowPlusModal(false);
+        navigation.navigate("VoteResults", { conversationId: conId! });
+      },
+    },
+    {
+      label: t("view_bills"),
+      onPress: () => {
+        setShowPlusModal(false);
+        navigation.navigate("BillResults", { conversationId: conId! });
+      },
+    },
+  ];
+
+  const handleCreateBill = async (data: CreateBillRequest) => {
+    setShowCreateBillModal(false);
+    try {
+      await dispatch(
+        userCreateBillSession({
+          conversationId: conId!,
+          voteSessionId: data.voteSessionId,
+          currency: data.currency,
+          totalAmount: data.totalAmount,
+          splitType: data.splitType,
+          customSplits:
+            data.splitType === "CUSTOM" && data.customSplits
+              ? data.customSplits.map((s) => ({
+                  userId: s.userId,
+                  amount: s.amount,
+                }))
+              : undefined,
+        }),
+      ).unwrap();
+
+      Toast.show({ type: "success", text1: t("create_bill_success") });
+    } catch (error) {
+      console.error("Error creating bill:", error);
+      Toast.show({ type: "error", text1: t("create_bill_error") });
+    }
+  };
+
+  const handleFinalizeBill = async () => {
+    if (!selectedBillId) return;
+    setShowCreateBillModal(false);
+    try {
+      await dispatch(userFinalizeBillSession(selectedBillId)).unwrap();
+
+      Toast.show({ type: "success", text1: t("finalize_bill_success") });
+    } catch (error) {
+      console.error("Error finalizing bill:", error);
+      Toast.show({ type: "error", text1: t("finalize_bill_error") });
+    }
+  };
+
+  const handleSelectPoll = (pollId: string) => {
+    setSelectedPollId(pollId);
+  };
+
+  const handleSelectBill = (billId: string) => {
+    setSelectedBillId(billId);
+  };
+
+  const selectedBill = billSessions.find((bill) => bill.id === selectedBillId);
+
+  const handleConfirmBillPayment = async (
+    userId: number,
+    billSessionId: string,
+  ) => {
+    try {
+      await dispatch(
+        userConfirmBillPayment({ userId, billSessionId }),
+      ).unwrap();
+      Toast.show({ type: "success", text1: t("bill_payment_success") });
+    } catch (error) {
+      console.error("Error confirming bill payment:", error);
+      Toast.show({ type: "error", text1: t("bill_payment_error") });
+    }
+  };
 
   const handleOpenGroupDetail = () => {
     navigation.navigate("GroupDetail", { conversationId: conId! });
@@ -187,6 +313,32 @@ const ChatScreen = () => {
     setUpdateContent(text);
   };
 
+  const handleCreateVote = async (
+    name: string,
+    options: { placeId: string; name: string; address: string }[],
+  ) => {
+    setShowCreateVoteModal(false);
+    try {
+      await dispatch(
+        userCreateVoteSession({
+          conversationId: conId!,
+          name,
+          options,
+        }),
+      ).unwrap();
+      Toast.show({
+        type: "success",
+        text1: t("create_vote_success"),
+      });
+    } catch (error) {
+      console.error("Error creating vote:", error);
+      Toast.show({
+        type: "error",
+        text1: t("create_vote_error"),
+      });
+    }
+  };
+
   const handleLoadMore = async () => {
     if (messagesList.hasMore && messagesList.nextCursor && !loading) {
       try {
@@ -278,11 +430,38 @@ const ChatScreen = () => {
         });
       }
     };
+
+    const fetchVoteSessions = async () => {
+      if (!conId) return;
+      try {
+        const res = await dispatch(userGetVoteSessions(conId)).unwrap();
+        setVoteSessions(res);
+      } catch (error) {
+        console.error("Error fetching vote sessions:", error);
+      }
+    };
+
+    const fetchBillSessions = async () => {
+      if (!conId) return;
+      try {
+        const res = await dispatch(userGetBillSessions(conId)).unwrap();
+        setBillSessions(res);
+      } catch (error) {
+        console.error("Error fetching bill sessions:", error);
+      }
+    };
+
     fetchMessages();
+    fetchVoteSessions();
+    fetchBillSessions();
   }, [conId]);
 
   useEffect(() => {
-    if (!messages.every((msg) => msg && msg.conversationId === conId)) return;
+    if (
+      !Array.isArray(messages) ||
+      !messages.every((msg) => msg && msg.conversationId === conId)
+    )
+      return;
     setMessagesList((prev) => ({
       ...prev,
       messages: [
@@ -296,6 +475,48 @@ const ChatScreen = () => {
       ],
     }));
   }, [messages]);
+
+  useEffect(() => {
+    if (
+      !Array.isArray(votes) ||
+      !votes.every((v) => v && v.conversationId === conId)
+    )
+      return;
+    setVoteSessions((prev) => {
+      // Update or add votes by id
+      const updated = [...prev];
+      votes.forEach((vote) => {
+        const idx = updated.findIndex((v) => v.id === vote.id);
+        if (idx !== -1) {
+          updated[idx] = { ...updated[idx], ...vote };
+        } else {
+          updated.push(vote);
+        }
+      });
+      return updated;
+    });
+  }, [votes]);
+
+  useEffect(() => {
+    if (
+      !Array.isArray(bills) ||
+      !bills.every((b) => b && b.conversationId === conId)
+    )
+      return;
+    setBillSessions((prev) => {
+      // Update or add bills by id
+      const updated = [...prev];
+      bills.forEach((bill) => {
+        const idx = updated.findIndex((b) => b.id === bill.id);
+        if (idx !== -1) {
+          updated[idx] = { ...updated[idx], ...bill };
+        } else {
+          updated.push(bill);
+        }
+      });
+      return updated;
+    });
+  }, [bills]);
 
   return (
     <KeyboardAvoidingView
@@ -325,6 +546,16 @@ const ChatScreen = () => {
             />
           )}
         </View>
+        <VoteStickyBar
+          voteSessions={voteSessions.filter((v) => v.status !== "CLOSED")}
+          onSelectPoll={handleSelectPoll}
+        />
+        <BillStickyBar
+          billSessions={billSessions.filter(
+            (bill) => bill.status !== "SETTLED",
+          )}
+          onSelectBill={handleSelectBill}
+        />
 
         {loading && (
           <ActivityIndicator
@@ -366,7 +597,11 @@ const ChatScreen = () => {
           </View>
         )}
         <View style={styles.message_input_container}>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setShowPlusModal(true);
+            }}
+          >
             <Feather name="plus-circle" size={40} color={colors.secondary} />
           </TouchableOpacity>
           <MessageInput
@@ -397,6 +632,53 @@ const ChatScreen = () => {
         onClose={() => setShowSelectModal(false)}
         title={t("options")}
       />
+      <SelectModal
+        visible={showPlusModal}
+        options={plusOptions}
+        onClose={() => setShowPlusModal(false)}
+        title={t("options")}
+      />
+      <CreateVoteModal
+        visible={showCreateVoteModal}
+        onClose={() => setShowCreateVoteModal(false)}
+        onSubmit={handleCreateVote}
+      />
+
+      <CreateBillModal
+        visible={showCreateBillModal}
+        onClose={() => setShowCreateBillModal(false)}
+        onSubmit={handleCreateBill}
+        voteSessions={voteSessions}
+        members={(
+          conversations?.conversations?.find((c) => c.id === conId)
+            ?.participants || []
+        ).map((p) => p.chatUserSnapshot)}
+        conversationId={conId!}
+      />
+
+      {selectedPollId && (
+        <VoteOptionList
+          voteSession={voteSessions.find((v) => v.id === selectedPollId)!}
+          visible={true}
+          onCancel={() => setSelectedPollId(null)}
+        />
+      )}
+
+      {selectedBill && (
+        <BillDetailModal
+          visible={!!selectedBill}
+          billSession={selectedBill ?? null}
+          members={(
+            conversations?.conversations?.find((c) => c.id === conId)
+              ?.participants || []
+          ).map((p) => p.chatUserSnapshot)}
+          isOwner={selectedBill?.createdBy === userInfo?.id}
+          myUserId={String(userInfo?.id ?? "")}
+          onClose={() => setSelectedBillId(null)}
+          onConfirmPayment={handleConfirmBillPayment}
+          onFinalize={handleFinalizeBill}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 };

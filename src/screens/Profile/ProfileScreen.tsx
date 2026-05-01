@@ -173,7 +173,7 @@ const ProfileScreen = () => {
             onPressOption={handleOpenSelectModal}
           />
           <View style={styles.info_container}>
-            <Avatar size={80} uri={userInfo?.avatar || null} />
+            <Avatar size={80} uri={user?.avatar || null} />
             <Text style={styles.title}>{truncateText(user?.fullName, 15)}</Text>
           </View>
         </>

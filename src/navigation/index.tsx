@@ -17,6 +17,8 @@ import CreateGroupChatScreen from "../screens/Chat/CreateGroupChatScreen";
 import GroupDetailScreen from "../screens/Chat/GroupDetailScreen";
 import AddMemberScreen from "../screens/Chat/AddMemberScreen";
 import CreatePostScreen from "../screens/Feed/CreatePostScreen";
+import VoteResultsScreen from "../screens/Chat/VoteResultsScreen";
+import BillResultsScreen from "../screens/Chat/BillResultsScreen";
 
 import { useSelector, useDispatch } from "react-redux";
 import { loadToken } from "../store/auth/authSlice";
@@ -132,6 +134,8 @@ export default function Navigation() {
             <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
             <Stack.Screen name="AddMember" component={AddMemberScreen} />
             <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+            <Stack.Screen name="VoteResults" component={VoteResultsScreen} />
+            <Stack.Screen name="BillResults" component={BillResultsScreen} />
           </>
         ) : (
           <>
