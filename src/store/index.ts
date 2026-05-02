@@ -3,6 +3,7 @@ import authReducer from "./auth/authSlice";
 import userReducer from "./user/userSlice";
 import chatReducer from "./chat/chatSlice";
 import feedReducer from "./feed/feedSlice";
+import notificationReducer from "./notification/notificationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     user: userReducer,
     chat: chatReducer,
     feed: feedReducer,
+    notification: notificationReducer,
   },
 });
 

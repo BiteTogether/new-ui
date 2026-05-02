@@ -67,4 +67,17 @@ export const API_ENDPOINTS = {
       DELETE: "/api/v1/feeds/saved-posts/{postId}",
     },
   },
+  NOTIFICATIONS: {
+    LIST: "/api/v1/notifications",
+    UNREAD_COUNT: "/api/v1/notifications/unread-count",
+    MARK_READ: "/api/v1/notifications/{id}/read",
+    MARK_ALL_READ: "/api/v1/notifications/read-all",
+    DELETE: "/api/v1/notifications/{id}",
+    CLEAR_ALL: "/api/v1/notifications",
+    SETTINGS: {
+      GET: "/api/v1/notifications/settings",
+      DEVICE_TOKEN: "/api/v1/notifications/settings/device-token",
+      PUSH_ENABLED: "/api/v1/notifications/settings/push-enabled",
+    },
+  },
 };

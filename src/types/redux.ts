@@ -1,6 +1,7 @@
 import { UserInfo } from "./user";
 import { ConversationsList } from "./chat";
 import { Posts } from "./feed";
+import { NotificationItem } from "./notification";
 
 export interface AuthState {
   loading: boolean;
@@ -28,4 +29,13 @@ export interface FeedState {
   error: string | null;
   posts: Posts;
   savedPosts: Posts;
+}
+
+export interface NotificationState {
+  loading: boolean;
+  error: string | null;
+  items: NotificationItem[];
+  unreadCount: number;
+  currentPage: number;
+  totalPages: number;
 }
