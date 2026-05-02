@@ -82,4 +82,7 @@ export const API_ENDPOINTS = {
       DELETE: "/api/v1/feeds/saved-posts/{postId}",
     },
   },
+  NOTI: {
+    USER_STATE: "/api/v1/user-state",
+  },
 };
