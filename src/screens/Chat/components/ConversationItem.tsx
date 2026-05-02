@@ -11,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MainStackParamList } from "../../../types/navigations";
 import { truncateText } from "../../../utils/helpers";
+import { setMembers } from "../../../store/chat/chatSlice";
 
 interface ConversationItemProps {
   conversationItem: Conversation;
@@ -51,6 +52,7 @@ const ConversationItem = ({
   };
 
   const handleOpenChat = () => {
+    dispatch(setMembers(conversationItem.participants));
     if (conversationItem.type === "DIRECT") {
       const otherUser = conversationItem.participants.find(
         (p) => p.chatUserSnapshot.userId !== userInfo?.id,

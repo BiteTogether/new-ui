@@ -67,7 +67,7 @@ export const API_ENDPOINTS = {
   FEED: {
     POST: {
       CREATE: "/api/v1/feeds",
-      GET: "/api/v1/feeds/new-feeds",
+      GET: "/api/v1/feeds/new-feeds/location",
       DELETE: "/api/v1/feeds/{id}",
       GET_BY_ID: "/api/v1/feeds/{id}",
       GET_BY_USERID: "/api/v1/feeds/user/{userId}",

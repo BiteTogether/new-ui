@@ -17,6 +17,9 @@ import ChatIcon from "../../assets/icons/ChatIcon";
 import { colors, fonts } from "../utils/constants";
 import { UserInfo as UserInfoType } from "../types/user";
 import { truncateText } from "../utils/helpers";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../store";
+import { setMembers } from "../store/chat/chatSlice";
 
 interface TopBarProps {
   type: "chat-direct" | "chat-group" | "myProfile" | "otherProfile" | "other";
@@ -43,12 +46,27 @@ const TopBar = ({
   onPressOption,
 }: TopBarProps) => {
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleGoBack = () => {
     navigation.goBack();
   };
 
   const handleOpenChat = () => {
+    dispatch(
+      setMembers([
+        {
+          chatUserSnapshot: {
+            userId: userInfo!.id,
+            username: userInfo!.username,
+            fullName: userInfo!.fullName,
+            phoneNumber: userInfo!.phoneNumber,
+            avatar: userInfo!.avatar,
+          },
+        },
+      ]),
+    );
+
     if (userInfo) {
       navigation.navigate("Chat", {
         id: userInfo.id,

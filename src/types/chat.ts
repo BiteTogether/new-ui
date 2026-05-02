@@ -17,29 +17,31 @@ export interface Conversation {
     conversationId: string;
     seq: number;
     senderId: number;
-    type: "TEXT" | "IMAGE" | "FILE" | "EMOJI";
+    type: "TEXT" | "IMAGE" | "FILE" | "EMOJI" | "POST_COMMENT";
+    postId?: string;
+    photoUrl?: string;
     content: string;
   };
-  participants: [
-    {
-      createdAt: string;
-      updatedAt: string;
-      createdBy: "SYSTEM" | "USER";
-      updatedBy: "SYSTEM" | "USER";
-      id: string;
-      chatUserSnapshot: {
-        userId: number;
-        username: string;
-        fullName: string;
-        phoneNumber: string;
-        avatar: string | null;
-      };
-      role: "ADMIN" | "MEMBER";
-      lastReadMessageSequence: number;
-      joinedAt: string;
-    },
-  ];
+  participants: Participant[];
   unreadCount: number;
+}
+
+export interface Participant {
+  createdAt: string;
+  updatedAt: string;
+  createdBy: "SYSTEM" | "USER";
+  updatedBy: "SYSTEM" | "USER";
+  id: string;
+  chatUserSnapshot: {
+    userId: number;
+    username: string;
+    fullName: string;
+    phoneNumber: string;
+    avatar: string | null;
+  };
+  role: "ADMIN" | "MEMBER";
+  lastReadMessageSequence: number;
+  joinedAt: string;
 }
 
 export interface ConversationsList {
@@ -86,14 +88,18 @@ export interface Message {
   conversationId: string;
   seq: number;
   senderId: number;
-  type: "TEXT" | "IMAGE" | "FILE" | "EMOJI";
+  type: "TEXT" | "IMAGE" | "FILE" | "EMOJI" | "POST_COMMENT";
+  postId?: string;
+  photoUrl?: string;
   content: string;
 }
 
 export interface SendMessageRequest {
   conversationId: string;
   action: "SEND";
-  messageType: "TEXT" | "IMAGE" | "FILE" | "EMOJI";
+  messageType: "TEXT" | "IMAGE" | "FILE" | "EMOJI" | "POST_COMMENT";
+  postId?: string;
+  photoUrl?: string;
   content: string;
 }
 

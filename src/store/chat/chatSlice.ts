@@ -1,4 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction } from "@reduxjs/toolkit";
+import { Participant } from "../../types/chat";
 import {
   userGetConversations,
   userSendMessage,
@@ -30,12 +32,17 @@ const initialState: ChatState = {
   error: null,
   conversations: null,
   state: "IDLE",
+  members: [],
 };
 
 const chatSlice = createSlice({
   name: "chat",
   initialState,
-  reducers: {},
+  reducers: {
+    setMembers: (state, action: PayloadAction<Partial<Participant>[]>) => {
+      state.members = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     // Get conversations actions
     builder
@@ -368,4 +375,5 @@ const chatSlice = createSlice({
   },
 });
 
+export const { setMembers } = chatSlice.actions;
 export default chatSlice.reducer;

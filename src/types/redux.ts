@@ -1,5 +1,5 @@
 import { UserInfo } from "./user";
-import { ConversationsList } from "./chat";
+import { ConversationsList, Participant } from "./chat";
 import { Posts } from "./feed";
 
 export interface AuthState {
@@ -21,6 +21,7 @@ export interface ChatState {
   error: string | null;
   state: "IDLE" | "SENDING" | "SUCCESS" | "ERROR";
   conversations: ConversationsList | null;
+  members: Partial<Participant>[];
 }
 
 export interface FeedState {
