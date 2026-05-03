@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#262626"
     },
     "ios": {
       "supportsTablet": true,
@@ -19,7 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#262626"
       },
       "predictiveBackGestureEnabled": false,
       "googleServicesFile": "./google-services.json",
@@ -32,6 +32,14 @@
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
       "@react-native-firebase/crashlytics",
+      [
+        "@react-native-firebase/analytics",
+        {
+          "ios": {
+            "withoutAdIdSupport": true
+          }
+        }
+      ],
       [
         "expo-build-properties",
         {
@@ -56,8 +64,8 @@
       [
         "react-native-maps",
         {
-          "androidGoogleMapsApiKey": "process.env.ANDROID_GOOGLE_MAPS_API_KEY",
-          "iosGoogleMapsApiKey": "process.env.IOS_GOOGLE_MAPS_API_KEY"
+          "androidGoogleMapsApiKey": "AIzaSyA0_4RqqkSGnMDGN0jN_IKWlR25-XJAdIQ",
+          "iosGoogleMapsApiKey": "AIzaSyBHQUPDRIYSEbi7HcJzYQDn_dMuhpne6zo"
         }
       ],
       [

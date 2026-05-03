@@ -52,6 +52,7 @@ import VoteStickyBar from "./components/VoteStickyBar";
 import BillStickyBar from "./components/BillStickyBar";
 import CreateBillModal from "./components/CreateBillModal";
 import BillDetailModal from "./components/BillDetailModal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ChatScreen = () => {
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
@@ -142,10 +143,7 @@ const ChatScreen = () => {
       label: t("view_members_location"),
       onPress: () => {
         setShowPlusModal(false);
-        navigation.navigate("Home", {
-          conversationId: conId!,
-          mySharing: myLocation?.sharing || false,
-        });
+        navigation.navigate("Home");
       },
     },
     {
@@ -280,6 +278,13 @@ const ChatScreen = () => {
               longitude: userLocation.longitude,
             },
           });
+          await AsyncStorage.setItem(
+            "CONVERSATION_LOCATION_SHARING",
+            JSON.stringify({
+              conversationId: conId,
+              isSharing: myLocation?.sharing || false,
+            }),
+          );
         } else {
           await sendLocation({
             conversationId: conId,
@@ -289,6 +294,7 @@ const ChatScreen = () => {
             },
             isSharing: false,
           });
+          await AsyncStorage.removeItem("CONVERSATION_LOCATION_SHARING");
         }
       }
     } catch (error) {

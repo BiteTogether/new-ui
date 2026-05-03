@@ -41,6 +41,7 @@ import {
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { setUserLocation } from "../../store/user/userSlice";
 import { useWebSocket } from "../../hooks/useWebSocket";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeScreen = () => {
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
@@ -225,9 +226,11 @@ const HomeScreen = () => {
               latitudeDelta: 0.01,
               longitudeDelta: 0.015,
             });
-            if (route.params?.conversationId && route.params?.mySharing) {
+
+            const sharing = sharingRef.current;
+            if (sharing?.isSharing && sharing.conversationId) {
               sendLocation({
-                conversationId: route.params.conversationId,
+                conversationId: sharing.conversationId,
                 location: {
                   latitude: location.coords.latitude,
                   longitude: location.coords.longitude,
@@ -243,6 +246,27 @@ const HomeScreen = () => {
       return () => {
         if (subscription) subscription.remove();
       };
+    }, []),
+  );
+
+  const sharingRef = useRef<{
+    conversationId: string;
+    isSharing: boolean;
+  } | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadSharing = async () => {
+        const data = await AsyncStorage.getItem(
+          "CONVERSATION_LOCATION_SHARING",
+        );
+
+        if (data) {
+          sharingRef.current = JSON.parse(data);
+        }
+      };
+
+      loadSharing();
     }, []),
   );
 

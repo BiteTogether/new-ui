@@ -6,10 +6,7 @@ export type AuthStackParamList = {
 };
 
 export type MainStackParamList = {
-  Home:
-    | undefined
-    | { postId: string }
-    | { conversationId: string; mySharing: boolean };
+  Home: undefined | { postId: string };
   Chat: {
     // DIRECT
     id?: number;
