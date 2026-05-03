@@ -78,6 +78,20 @@ export interface AddUserToConversationResponse {
   joinedAt: string;
 }
 
+export interface GetUserLocationsResponse {
+  conversationId: string;
+  userId: number;
+  fullName: string;
+  avatar: string | null;
+  lat: number;
+  lng: number;
+  accuracy: number;
+  heading: number;
+  speed: number;
+  timestamp: string;
+  sharing: boolean;
+}
+
 // Message
 export interface Message {
   createdAt: string;

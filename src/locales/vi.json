@@ -182,5 +182,8 @@
 "finalize_bill": "Hoàn thành hóa đơn",
 "finalize_bill_success": "Hoàn thành hóa đơn thành công.",
 "finalize_bill_error": "Hoàn thành hóa đơn thất bại. Vui lòng thử lại.",
-"enter_vote_name": "Nhập tên cuộc thăm dò"
+"enter_vote_name": "Nhập tên cuộc thăm dò",
+"send_location": "Gửi vị trí",
+"stop_send_location": "Dừng gửi vị trí",
+"view_members_location": "Xem vị trí thành viên"
 }

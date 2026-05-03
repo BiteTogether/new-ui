@@ -39,15 +39,20 @@ import {
   userDeletePost,
 } from "../../store/feed/feedActions";
 import { useRoute, RouteProp } from "@react-navigation/native";
+import { setUserLocation } from "../../store/user/userSlice";
+import { useWebSocket } from "../../hooks/useWebSocket";
 
 const HomeScreen = () => {
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
-  const [gpsRegion, setGpsRegion] = useState<Region | undefined>(undefined);
   const [mapRegion, setMapRegion] = useState<Region | undefined>(undefined);
-  const { userInfo } = useSelector((state: RootState) => state.user);
+  const { userInfo, userLocation } = useSelector(
+    (state: RootState) => state.user,
+  );
   const { posts, savedPosts } = useSelector((state: RootState) => state.feed);
+  const { locations } = useSelector((state: RootState) => state.chat);
+  const { sendLocation } = useWebSocket("LOCATION_UPDATE");
   const SearchRef = useRef<Modalize>(null);
   const FriendsRef = useRef<Modalize>(null);
   const ChatListRef = useRef<Modalize>(null);
@@ -159,7 +164,7 @@ const HomeScreen = () => {
   };
 
   const pickImage = async () => {
-    if (!gpsRegion) return;
+    if (!userLocation) return;
     // No permissions request is necessary for launching the image library.
     // Manually request permissions for videos on iOS when `allowsEditing` is set to `false`
     // and `videoExportPreset` is `'Passthrough'` (the default), ideally before launching the picker
@@ -185,8 +190,8 @@ const HomeScreen = () => {
       const uri = result.assets[0].uri;
       navigation.navigate("CreatePost", {
         imageUri: uri,
-        latitude: gpsRegion.latitude,
-        longitude: gpsRegion.longitude,
+        latitude: userLocation?.latitude,
+        longitude: userLocation?.longitude,
       });
     }
   };
@@ -206,18 +211,29 @@ const HomeScreen = () => {
             distanceInterval: 10,
           },
           (location) => {
-            setGpsRegion({
-              latitude: 10.78215835395136,
-              longitude: 106.70510750924367,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.015,
-            });
+            dispatch(
+              setUserLocation({
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.015,
+              }),
+            );
             setMapRegion({
-              latitude: 10.78215835395136,
-              longitude: 106.70510750924367,
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
               latitudeDelta: 0.01,
               longitudeDelta: 0.015,
             });
+            if (route.params?.conversationId && route.params?.mySharing) {
+              sendLocation({
+                conversationId: route.params.conversationId,
+                location: {
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                },
+              });
+            }
           },
         );
       }
@@ -269,7 +285,8 @@ const HomeScreen = () => {
         <ModalMap
           region={mapRegion}
           setRegion={setMapRegion}
-          gpsRegion={gpsRegion}
+          gpsRegion={userLocation}
+          membersLocations={locations}
           posts={posts}
           onPressMarker={handleOpenPostDetail}
           onOpenSavedPosts={handleOpenSavedPosts}

@@ -42,6 +42,7 @@ export const API_ENDPOINTS = {
         "/api/v1/conversations/{conversationId}/participants/{userId}/role",
       GET_BY_ID: "/api/v1/conversations/{conversationId}",
       UPLOAD_AVATAR: "/api/v1/conversations/{conversationId}/avatar",
+      GET_LOCATIONS: "/api/v1/conversations/{conversationId}/locations",
     },
     MESSAGES: {
       UPDATE: "/api/v1/messages/{messageId}",

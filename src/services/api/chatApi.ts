@@ -15,6 +15,7 @@ import {
   BillSession,
   VoteList,
   BillList,
+  GetUserLocationsResponse,
 } from "../../types/chat";
 import { UploadImage } from "../../types/user";
 
@@ -90,6 +91,14 @@ export const getConversationById = (conversationId: string) => {
     conversationId,
   );
   return apiService.get<Conversation>(endpoint);
+};
+
+export const getConversationLocations = (conversationId: string) => {
+  const endpoint = API_ENDPOINTS.CHAT.CONVERSATIONS.GET_LOCATIONS.replace(
+    "{conversationId}",
+    conversationId,
+  );
+  return apiService.get<GetUserLocationsResponse[]>(endpoint);
 };
 
 // Message

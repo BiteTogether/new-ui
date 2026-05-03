@@ -22,6 +22,7 @@ import {
   finalizeBillSession,
   getBillSessions,
   getBillSessionById,
+  getConversationLocations,
 } from "../../services/api/chatApi";
 import {
   SendMessageRequest,
@@ -183,6 +184,25 @@ export const userUpdateRoleInConversation = createAsyncThunk(
   async (data: UserConversationRequest, { rejectWithValue }) => {
     try {
       const response = await updateUserRoleInConversation(data);
+      if (response.status === 200 && response.data) {
+        return response.data;
+      }
+      return rejectWithValue(response.message);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  },
+);
+
+export const userGetLocations = createAsyncThunk(
+  "chat/getLocations",
+  async (conversationId: string, { rejectWithValue }) => {
+    try {
+      const response = await getConversationLocations(conversationId);
       if (response.status === 200 && response.data) {
         return response.data;
       }

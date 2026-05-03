@@ -1,7 +1,8 @@
 // useWebSocket.js
 import { useEffect, useState } from 'react';
 import websocketService from '../services/webSocketService';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setLocations } from '../store/chat/chatSlice';
 
 export function useWebSocket(messageType) {
   const [messages, setMessages] = useState([]);
@@ -9,7 +10,8 @@ export function useWebSocket(messageType) {
   const [bills, setBills] = useState([]);
   const [isConnected, setIsConnected] = useState(websocketService.isConnected);
   const { token } = useSelector((state) => state.auth);
-  
+  const dispatch = useDispatch();
+
   useEffect(() => {
     if (token) {
       // Connect to WebSocket
@@ -55,6 +57,13 @@ export function useWebSocket(messageType) {
         }
       };
 
+      const locationCallback = (data) => {
+        const nextLocation = data.location;
+        if (!nextLocation) return;
+
+        dispatch(setLocations([nextLocation]));
+      };
+
       const billCallback = (data) => {
         switch (data.eventType) {
           case "BILL_CREATED":
@@ -90,6 +99,7 @@ export function useWebSocket(messageType) {
       websocketService.addCallbacks(messageType, messageCallback);
       websocketService.addCallbacks(messageType, voteCallback);
       websocketService.addCallbacks(messageType, billCallback);
+      websocketService.addCallbacks(messageType, locationCallback);
       websocketService.addCallbacks('connect', connectCallback);
       websocketService.addCallbacks('disconnect', disconnectCallback);
 
@@ -98,16 +108,40 @@ export function useWebSocket(messageType) {
         websocketService.removeCallbacks(messageType, messageCallback);
         websocketService.removeCallbacks(messageType, voteCallback);
         websocketService.removeCallbacks(messageType, billCallback);
+        websocketService.removeCallbacks(messageType, locationCallback);
         websocketService.removeCallbacks('connect', connectCallback);
         websocketService.removeCallbacks('disconnect', disconnectCallback);
       };
     }
   }, [messageType, token]);
+
+  const sendLocation = ({
+    conversationId,
+    location,
+    isSharing = true,
+  }) => {
+    if (!websocketService.isConnected) return false;
+
+    if (!conversationId || !location) return false;
+
+    const payload = {
+      conversationId,
+      action: "LOCATION_UPDATE",
+      location: {
+        lat: location.latitude,
+        lng: location.longitude,
+      },
+      isSharing,
+    };
+
+    return websocketService.sendMessage(payload);
+  };
   
   return {
     messages,
     votes,
     bills,
     isConnected,
+    sendLocation,
   };
 }

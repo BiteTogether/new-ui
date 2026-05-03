@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction } from "@reduxjs/toolkit";
 import {
   userGetInfo,
   userUpdateInfo,
@@ -11,12 +12,20 @@ const initialState: UserState = {
   loading: false,
   error: null,
   userInfo: null,
+  userLocation: null,
 };
 
 const userSlice = createSlice({
   name: "user",
   initialState,
-  reducers: {},
+  reducers: {
+    setUserLocation: (
+      state,
+      action: PayloadAction<UserState["userLocation"]>,
+    ) => {
+      state.userLocation = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     // Get user info actions
     builder
@@ -87,4 +96,5 @@ const userSlice = createSlice({
   },
 });
 
+export const { setUserLocation } = userSlice.actions;
 export default userSlice.reducer;

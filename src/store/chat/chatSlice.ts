@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit";
-import { Participant } from "../../types/chat";
+import { Participant, GetUserLocationsResponse } from "../../types/chat";
 import {
   userGetConversations,
   userSendMessage,
@@ -24,6 +24,7 @@ import {
   userFinalizeBillSession,
   userGetBillSessions,
   userGetBillSessionById,
+  userGetLocations,
 } from "./chatActions";
 import { ChatState } from "../../types/redux";
 
@@ -33,6 +34,7 @@ const initialState: ChatState = {
   conversations: null,
   state: "IDLE",
   members: [],
+  locations: [],
 };
 
 const chatSlice = createSlice({
@@ -41,6 +43,32 @@ const chatSlice = createSlice({
   reducers: {
     setMembers: (state, action: PayloadAction<Partial<Participant>[]>) => {
       state.members = action.payload;
+    },
+    setLocations: (
+      state,
+      action: PayloadAction<GetUserLocationsResponse[]>,
+    ) => {
+      action.payload.forEach((incoming) => {
+        if (incoming.sharing === false) {
+          state.locations = state.locations.filter(
+            (loc) => loc.userId !== incoming.userId,
+          );
+          return;
+        }
+
+        const index = state.locations.findIndex(
+          (loc) => loc.userId === incoming.userId,
+        );
+
+        if (index !== -1) {
+          state.locations[index] = {
+            ...state.locations[index],
+            ...incoming,
+          };
+        } else {
+          state.locations.push(incoming);
+        }
+      });
     },
   },
   extraReducers: (builder) => {
@@ -183,6 +211,22 @@ const chatSlice = createSlice({
         state.error = null;
       })
       .addCase(userUpdateRoleInConversation.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Get conversation locations actions
+    builder
+      .addCase(userGetLocations.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userGetLocations.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.locations = action.payload;
+      })
+      .addCase(userGetLocations.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
@@ -375,5 +419,5 @@ const chatSlice = createSlice({
   },
 });
 
-export const { setMembers } = chatSlice.actions;
+export const { setMembers, setLocations } = chatSlice.actions;
 export default chatSlice.reducer;

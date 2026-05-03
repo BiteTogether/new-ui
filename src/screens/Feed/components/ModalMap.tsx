@@ -8,6 +8,9 @@ import { truncateText } from "../../../utils/helpers";
 import MapView from "react-native-map-clustering";
 import Loading from "../../../components/Loading";
 import { FontAwesome } from "@expo/vector-icons";
+import { GetUserLocationsResponse } from "../../../types/chat";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
 
 interface ModalMapProps {
   region?: Region;
@@ -16,6 +19,7 @@ interface ModalMapProps {
   posts?: Posts;
   onPressMarker?: (post: Post) => void;
   onOpenSavedPosts?: () => void;
+  membersLocations?: GetUserLocationsResponse[];
 }
 
 const ModalMap = ({
@@ -25,7 +29,9 @@ const ModalMap = ({
   posts,
   onPressMarker,
   onOpenSavedPosts,
+  membersLocations,
 }: ModalMapProps) => {
+  const { userInfo } = useSelector((state: RootState) => state.user);
   const mapRef = useRef<MapView>(null);
   const handleFocusLocation = () => {
     if (gpsRegion) {
@@ -80,6 +86,25 @@ const ModalMap = ({
             </View>
           </Marker>
         ))}
+
+        {membersLocations
+          ?.filter((loc) => loc.userId !== userInfo?.id)
+          ?.map((location, index) => (
+            <Marker
+              key={index}
+              coordinate={{
+                latitude: Number(location.lat),
+                longitude: Number(location.lng),
+              }}
+            >
+              <View style={{ alignItems: "center" }}>
+                <Image
+                  source={{ uri: location?.avatar }}
+                  style={styles.avatar}
+                />
+              </View>
+            </Marker>
+          ))}
       </MapView>
 
       <View style={styles.button_container}>

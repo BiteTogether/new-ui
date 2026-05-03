@@ -182,5 +182,8 @@
 "finalize_bill": "Finalize bill",
 "finalize_bill_success": "Bill session finalized successfully.",
 "finalize_bill_error": "Failed to finalize bill session. Please try again.",
-"enter_vote_name": "Enter vote name"
+"enter_vote_name": "Enter vote name",
+"send_location": "Send location",
+"stop_send_location": "Stop sending location",
+"view_members_location": "View members' location"
 }

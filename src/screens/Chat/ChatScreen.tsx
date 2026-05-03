@@ -31,6 +31,7 @@ import {
   userConfirmBillPayment,
   userFinalizeBillSession,
   userGetBillSessions,
+  userGetLocations,
 } from "../../store/chat/chatActions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../../store";
@@ -58,15 +59,18 @@ const ChatScreen = () => {
   const route = useRoute<RouteProp<MainStackParamList, "Chat">>();
   const { id, username, fullName, avatar, conversationId, type, name } =
     route.params;
-  const { messages, isConnected } = useWebSocket("SEND") as {
-    messages: Message[];
-    isConnected: boolean;
-  };
+  const { messages, isConnected, sendLocation } = useWebSocket("SEND");
   const { votes } = useWebSocket("VOTE_UPDATE") as { votes: VoteList };
   const { bills } = useWebSocket("BILL_UPDATE") as { bills: BillList };
+  const {} = useWebSocket("LOCATION_UPDATE");
+
   const dispatch = useDispatch<AppDispatch>();
-  const { conversations } = useSelector((state: RootState) => state.chat);
-  const { userInfo } = useSelector((state: RootState) => state.user);
+  const { conversations, locations } = useSelector(
+    (state: RootState) => state.chat,
+  );
+  const { userInfo, userLocation } = useSelector(
+    (state: RootState) => state.user,
+  );
   const [messagesList, setMessagesList] = useState<MessagesList>({
     messages: messages,
     nextCursor: 0,
@@ -89,6 +93,9 @@ const ChatScreen = () => {
   const [billSessions, setBillSessions] = useState<BillList>(bills);
   const [selectedPollId, setSelectedPollId] = useState<string | null>(null);
   const [selectedBillId, setSelectedBillId] = useState<string | null>(null);
+
+  const myLocation = locations?.find((loc) => loc.userId === userInfo?.id);
+  const isSharing = myLocation?.sharing;
 
   const [behaviour, setBehaviour] = useState<"height" | undefined>("height");
   useEffect(() => {
@@ -124,6 +131,23 @@ const ChatScreen = () => {
   ];
 
   const plusOptions: Option[] = [
+    {
+      label: isSharing ? t("stop_send_location") : t("send_location"),
+      onPress: () => {
+        setShowPlusModal(false);
+        handleSendLocation();
+      },
+    },
+    {
+      label: t("view_members_location"),
+      onPress: () => {
+        setShowPlusModal(false);
+        navigation.navigate("Home", {
+          conversationId: conId!,
+          mySharing: myLocation?.sharing || false,
+        });
+      },
+    },
     {
       label: t("create_vote"),
       onPress: () => {
@@ -237,6 +261,38 @@ const ChatScreen = () => {
       }
     } catch (error) {
       console.error("Error sending message:", error);
+      Toast.show({
+        type: "error",
+        text1: t("error_occurred"),
+      });
+    }
+  };
+
+  const handleSendLocation = async () => {
+    setShowPlusModal(false);
+    try {
+      if (isConnected && conId && userLocation) {
+        if (!isSharing) {
+          await sendLocation({
+            conversationId: conId,
+            location: {
+              latitude: userLocation.latitude,
+              longitude: userLocation.longitude,
+            },
+          });
+        } else {
+          await sendLocation({
+            conversationId: conId,
+            location: {
+              latitude: userLocation.latitude,
+              longitude: userLocation.longitude,
+            },
+            isSharing: false,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error sending location:", error);
       Toast.show({
         type: "error",
         text1: t("error_occurred"),
@@ -451,9 +507,19 @@ const ChatScreen = () => {
       }
     };
 
+    const fetchConversationLocations = async () => {
+      if (!conId) return;
+      try {
+        await dispatch(userGetLocations(conId)).unwrap();
+      } catch (error) {
+        console.error("Error fetching conversation locations:", error);
+      }
+    };
+
     fetchMessages();
     fetchVoteSessions();
     fetchBillSessions();
+    fetchConversationLocations();
   }, [conId]);
 
   useEffect(() => {
