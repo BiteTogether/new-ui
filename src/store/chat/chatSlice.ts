@@ -1,4 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction } from "@reduxjs/toolkit";
+import { Participant, GetUserLocationsResponse } from "../../types/chat";
 import {
   userGetConversations,
   userSendMessage,
@@ -11,6 +13,18 @@ import {
   userUpdateConversation,
   userRemoveMemberFromConversation,
   userUpdateRoleInConversation,
+  userAddMembersToConversation,
+  userCreateVoteSession,
+  userCloseVoteSession,
+  userCastVote,
+  userGetVoteSessions,
+  userGetVoteSessionById,
+  userCreateBillSession,
+  userConfirmBillPayment,
+  userFinalizeBillSession,
+  userGetBillSessions,
+  userGetBillSessionById,
+  userGetLocations,
 } from "./chatActions";
 import { ChatState } from "../../types/redux";
 
@@ -19,12 +33,44 @@ const initialState: ChatState = {
   error: null,
   conversations: null,
   state: "IDLE",
+  members: [],
+  locations: [],
 };
 
 const chatSlice = createSlice({
   name: "chat",
   initialState,
-  reducers: {},
+  reducers: {
+    setMembers: (state, action: PayloadAction<Partial<Participant>[]>) => {
+      state.members = action.payload;
+    },
+    setLocations: (
+      state,
+      action: PayloadAction<GetUserLocationsResponse[]>,
+    ) => {
+      action.payload.forEach((incoming) => {
+        if (incoming.sharing === false) {
+          state.locations = state.locations.filter(
+            (loc) => loc.userId !== incoming.userId,
+          );
+          return;
+        }
+
+        const index = state.locations.findIndex(
+          (loc) => loc.userId === incoming.userId,
+        );
+
+        if (index !== -1) {
+          state.locations[index] = {
+            ...state.locations[index],
+            ...incoming,
+          };
+        } else {
+          state.locations.push(incoming);
+        }
+      });
+    },
+  },
   extraReducers: (builder) => {
     // Get conversations actions
     builder
@@ -139,6 +185,21 @@ const chatSlice = createSlice({
         state.error = action.payload as string;
       });
 
+    // Add members to conversation
+    builder
+      .addCase(userAddMembersToConversation.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userAddMembersToConversation.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userAddMembersToConversation.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
     // Update user role in conversation
     builder
       .addCase(userUpdateRoleInConversation.pending, (state) => {
@@ -150,6 +211,22 @@ const chatSlice = createSlice({
         state.error = null;
       })
       .addCase(userUpdateRoleInConversation.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Get conversation locations actions
+    builder
+      .addCase(userGetLocations.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userGetLocations.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.locations = action.payload;
+      })
+      .addCase(userGetLocations.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
@@ -207,7 +284,140 @@ const chatSlice = createSlice({
       .addCase(userUpdateMessage.rejected, (state, action) => {
         state.error = action.payload as string;
       });
+
+    // Create vote session actions
+    builder
+      .addCase(userCreateVoteSession.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(userCreateVoteSession.fulfilled, (state) => {
+        state.error = null;
+      })
+      .addCase(userCreateVoteSession.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Close vote session actions
+    builder
+      .addCase(userCloseVoteSession.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(userCloseVoteSession.fulfilled, (state) => {
+        state.error = null;
+      })
+      .addCase(userCloseVoteSession.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Cast vote actions
+    builder
+      .addCase(userCastVote.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(userCastVote.fulfilled, (state) => {
+        state.error = null;
+      })
+      .addCase(userCastVote.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Get vote sessions actions
+    builder
+      .addCase(userGetVoteSessions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userGetVoteSessions.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userGetVoteSessions.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Get vote session by ID actions
+    builder
+      .addCase(userGetVoteSessionById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userGetVoteSessionById.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userGetVoteSessionById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Create bill session actions
+    builder
+      .addCase(userCreateBillSession.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(userCreateBillSession.fulfilled, (state) => {
+        state.error = null;
+      })
+      .addCase(userCreateBillSession.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Confirm bill payment actions
+    builder
+      .addCase(userConfirmBillPayment.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(userConfirmBillPayment.fulfilled, (state) => {
+        state.error = null;
+      })
+      .addCase(userConfirmBillPayment.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Finalize bill session actions
+    builder
+      .addCase(userFinalizeBillSession.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(userFinalizeBillSession.fulfilled, (state) => {
+        state.error = null;
+      })
+      .addCase(userFinalizeBillSession.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Get bill sessions actions
+    builder
+      .addCase(userGetBillSessions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userGetBillSessions.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userGetBillSessions.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Get bill session by ID actions
+    builder
+      .addCase(userGetBillSessionById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(userGetBillSessionById.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(userGetBillSessionById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
+export const { setMembers, setLocations } = chatSlice.actions;
 export default chatSlice.reducer;

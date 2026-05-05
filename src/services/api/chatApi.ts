@@ -9,7 +9,15 @@ import {
   Message,
   SendMessageRequest,
   MessagesList,
+  CreateVoteRequest,
+  VoteSession,
+  CreateBillRequest,
+  BillSession,
+  VoteList,
+  BillList,
+  GetUserLocationsResponse,
 } from "../../types/chat";
+import { UploadImage } from "../../types/user";
 
 // Conversation
 export const getConversation = (conversationId: string) => {
@@ -20,16 +28,12 @@ export const getConversation = (conversationId: string) => {
   return apiService.get<Conversation>(endpoint);
 };
 
-export const updateConversation = (
-  conversationId: string,
-  name: string,
-  avatarUrl?: string,
-) => {
+export const updateConversation = (conversationId: string, name: string) => {
   const endpoint = API_ENDPOINTS.CHAT.CONVERSATIONS.UPDATE.replace(
     "{conversationId}",
     conversationId,
   );
-  return apiService.put<Conversation>(endpoint, { name, avatarUrl });
+  return apiService.put<Conversation>(endpoint, { name });
 };
 
 export const deleteConversation = (conversationId: string) => {
@@ -54,12 +58,15 @@ export const createConversation = (data: CreateConversationRequest) => {
   );
 };
 
-export const addUserToConversation = (data: UserConversationRequest) => {
+export const addUserToConversation = (
+  conversationId: string,
+  userIds: number[],
+) => {
   const endpoint = API_ENDPOINTS.CHAT.CONVERSATIONS.ADD_USER.replace(
     "{conversationId}",
-    data.conversationId,
-  ).replace("{userId}", data.userId.toString());
-  return apiService.post<AddUserToConversationResponse>(endpoint);
+    conversationId,
+  );
+  return apiService.post<AddUserToConversationResponse>(endpoint, { userIds });
 };
 
 export const removeUserFromConversation = (data: UserConversationRequest) => {
@@ -84,6 +91,14 @@ export const getConversationById = (conversationId: string) => {
     conversationId,
   );
   return apiService.get<Conversation>(endpoint);
+};
+
+export const getConversationLocations = (conversationId: string) => {
+  const endpoint = API_ENDPOINTS.CHAT.CONVERSATIONS.GET_LOCATIONS.replace(
+    "{conversationId}",
+    conversationId,
+  );
+  return apiService.get<GetUserLocationsResponse[]>(endpoint);
 };
 
 // Message
@@ -119,4 +134,91 @@ export const getMessagesList = (
   return apiService.get<MessagesList>(endpoint, {
     params: { cursor, limit },
   });
+};
+
+export const uploadConversationAvatar = (
+  conversationId: string,
+  avatarFile: UploadImage,
+) => {
+  const endpoint = API_ENDPOINTS.CHAT.CONVERSATIONS.UPLOAD_AVATAR.replace(
+    "{conversationId}",
+    conversationId.toString(),
+  );
+  const formData = new FormData();
+  formData.append("file", avatarFile as any);
+  return apiService.uploadFile(endpoint, formData);
+};
+
+// Vote
+export const createVoteSession = (data: CreateVoteRequest) => {
+  return apiService.post<VoteSession>(API_ENDPOINTS.CHAT.VOTE.CREATE, data);
+};
+
+export const closeVoteSession = (voteSessionId: string) => {
+  const endpoint = API_ENDPOINTS.CHAT.VOTE.CLOSE.replace(
+    "{voteSessionId}",
+    voteSessionId,
+  );
+  return apiService.post<VoteSession>(endpoint);
+};
+
+export const castVote = (voteSessionId: string, optionId: string) => {
+  const endpoint = API_ENDPOINTS.CHAT.VOTE.CAST.replace(
+    "{voteSessionId}",
+    voteSessionId,
+  );
+  return apiService.post(endpoint, { optionId });
+};
+
+export const getVoteSessions = (conversationId: string) => {
+  const endpoint = API_ENDPOINTS.CHAT.VOTE.GET.replace(
+    "{conversationId}",
+    conversationId,
+  );
+  return apiService.get<VoteList>(endpoint);
+};
+
+export const getVoteSessionById = (voteSessionId: string) => {
+  const endpoint = API_ENDPOINTS.CHAT.VOTE.GET_BY_ID.replace(
+    "{voteSessionId}",
+    voteSessionId,
+  );
+  return apiService.get<VoteSession>(endpoint);
+};
+
+// Bill
+export const createBillSession = (data: CreateBillRequest) => {
+  return apiService.post<BillSession>(API_ENDPOINTS.CHAT.BILL.CREATE, data);
+};
+
+export const confirmBillPayment = (billSessionId: string, userId: number) => {
+  const endpoint = API_ENDPOINTS.CHAT.BILL.CONFIRM_PAYMENT.replace(
+    "{billSessionId}",
+    billSessionId,
+  );
+  return apiService.post<BillSession>(endpoint, { userId });
+};
+
+export const finalizeBillSession = (billSessionId: string) => {
+  const endpoint = API_ENDPOINTS.CHAT.BILL.FINALIZE.replace(
+    "{billSessionId}",
+    billSessionId,
+  );
+  return apiService.post<BillSession>(endpoint);
+};
+
+export const getBillSessions = (conversationId: string) => {
+  const endpoint = API_ENDPOINTS.CHAT.BILL.GET.replace(
+    "{conversationId}",
+    conversationId,
+  );
+  return apiService.get<BillList>(endpoint);
+};
+
+export const getBillSessionById = (billSessionId: string) => {
+  const endpoint = API_ENDPOINTS.CHAT.BILL.GET_BY_ID.replace(
+    "{billSessionId}",
+    billSessionId,
+  );
+  return apiService.get<BillSession>(endpoint);
 };

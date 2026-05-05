@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import debounce from "lodash.debounce";
 import { Animated, Easing } from "react-native";
 import * as Clipboard from "expo-clipboard";
@@ -31,6 +31,11 @@ import {
   userUnsavePost,
   userLikePost,
 } from "../../store/feed/feedActions";
+import {
+  userSendMessage,
+  userCreateConversation,
+} from "../../store/chat/chatActions";
+import { formatDate } from "../../utils/helpers";
 
 interface PostDetailScreenProps {
   post: Post;
@@ -47,6 +52,7 @@ const PostDetailScreen = ({ post, onDeletePost }: PostDetailScreenProps) => {
   const [imageLoading, setImageLoading] = useState<boolean>(false);
   const [showSelectModal, setShowSelectModal] = useState<boolean>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [conId, setConId] = useState<string | null>(null);
 
   // Double tap logic
   const lastTap = useRef<number>(0);
@@ -136,9 +142,51 @@ const PostDetailScreen = ({ post, onDeletePost }: PostDetailScreenProps) => {
     navigation.navigate("Profile", { id: post.user.id });
   };
 
-  const handleSendMessage = (text: string) => {
-    // Implement send message logic here
+  const handleSendMessage = async (text: string) => {
+    try {
+      if (conId) {
+        await dispatch(
+          userSendMessage({
+            conversationId: conId,
+            action: "SEND",
+            messageType: "POST_COMMENT",
+            content: text,
+            postId: post.id,
+            photoUrl: post.photoUrl,
+          }),
+        ).unwrap();
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      Toast.show({
+        type: "error",
+        text1: t("error_occurred"),
+      });
+    }
   };
+
+  useEffect(() => {
+    const handleCreateConversation = async () => {
+      if (!conId && post.user.id !== userInfo?.id) {
+        try {
+          const res = await dispatch(
+            userCreateConversation({
+              type: "DIRECT",
+              participantIds: [userInfo!.id, post.user.id],
+            }),
+          ).unwrap();
+          setConId(res.id);
+        } catch (error) {
+          console.error("Error creating conversation:", error);
+          Toast.show({
+            type: "error",
+            text1: t("error_occurred"),
+          });
+        }
+      }
+    };
+    handleCreateConversation();
+  }, [conId]);
 
   return (
     <View style={styles.container}>
@@ -176,9 +224,20 @@ const PostDetailScreen = ({ post, onDeletePost }: PostDetailScreenProps) => {
             <Avatar uri={post.user.avatar} size={40} />
           </TouchableOpacity>
           <View style={{ justifyContent: "center", gap: 4 }}>
-            <Text style={styles.username_text}>
-              {truncateText(post.user.fullName, 10)}
-            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 8,
+                alignItems: "center",
+              }}
+            >
+              <Text style={styles.username_text}>
+                {truncateText(post.user.fullName, 10)}
+              </Text>
+              <Text style={{ color: colors.secondary }}>
+                {formatDate(post.createdAt)}
+              </Text>
+            </View>
             <View style={{ flexDirection: "row", gap: 2 }}>
               {Array.from({ length: post.rating }).map((_, idx) => (
                 <FontAwesome
@@ -275,8 +334,9 @@ const PostDetailScreen = ({ post, onDeletePost }: PostDetailScreenProps) => {
           }}
         >
           <MessageInput
+            type="chat"
             onSend={handleSendMessage}
-            placeholder={t("add_messages")}
+            placeholder={t("send_messages")}
           />
         </View>
       )}

@@ -216,7 +216,7 @@ const ChatListScreen = () => {
                   gap: 8,
                 }}
               >
-                <Avatar />
+                <Avatar uri={item.avatar} />
                 <View style={styles.username_container}>
                   <Text style={styles.fullName_text}>
                     {truncateText(item.fullName, 8)}

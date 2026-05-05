@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { StyleSheet, TouchableOpacity, Image, View, Text } from "react-native";
-import { Region, Marker, Callout } from "react-native-maps";
+import { Region, Marker } from "react-native-maps";
 import { colors } from "../../../utils/constants";
 import FocusIcon from "../../../../assets/icons/FocusIcon";
 import { Posts, Post } from "../../../types/feed";
@@ -8,6 +8,9 @@ import { truncateText } from "../../../utils/helpers";
 import MapView from "react-native-map-clustering";
 import Loading from "../../../components/Loading";
 import { FontAwesome } from "@expo/vector-icons";
+import { GetUserLocationsResponse } from "../../../types/chat";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
 
 interface ModalMapProps {
   region?: Region;
@@ -16,6 +19,7 @@ interface ModalMapProps {
   posts?: Posts;
   onPressMarker?: (post: Post) => void;
   onOpenSavedPosts?: () => void;
+  membersLocations?: GetUserLocationsResponse[];
 }
 
 const ModalMap = ({
@@ -25,7 +29,9 @@ const ModalMap = ({
   posts,
   onPressMarker,
   onOpenSavedPosts,
+  membersLocations,
 }: ModalMapProps) => {
+  const { userInfo } = useSelector((state: RootState) => state.user);
   const mapRef = useRef<MapView>(null);
   const handleFocusLocation = () => {
     if (gpsRegion) {
@@ -80,6 +86,28 @@ const ModalMap = ({
             </View>
           </Marker>
         ))}
+
+        {membersLocations
+          ?.filter((loc) => loc.userId !== userInfo?.id)
+          ?.map((location, index) => (
+            <Marker
+              key={index}
+              coordinate={{
+                latitude: Number(location.lat),
+                longitude: Number(location.lng),
+              }}
+            >
+              <View style={{ alignItems: "center", gap: 4 }}>
+                <View style={styles.content_container}>
+                  <Text>{truncateText(location.fullname, 20)}</Text>
+                </View>
+                <Image
+                  source={{ uri: location?.avatar }}
+                  style={styles.avatar}
+                />
+              </View>
+            </Marker>
+          ))}
       </MapView>
 
       <View style={styles.button_container}>

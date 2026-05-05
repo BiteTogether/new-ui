@@ -1,5 +1,9 @@
 import { UserInfo } from "./user";
-import { ConversationsList } from "./chat";
+import {
+  ConversationsList,
+  Participant,
+  GetUserLocationsResponse,
+} from "./chat";
 import { Posts } from "./feed";
 
 export interface AuthState {
@@ -14,6 +18,12 @@ export interface UserState {
   loading: boolean;
   error: string | null;
   userInfo: UserInfo | null;
+  userLocation: {
+    latitude: number;
+    longitude: number;
+    latitudeDelta: number;
+    longitudeDelta: number;
+  } | null;
 }
 
 export interface ChatState {
@@ -21,6 +31,8 @@ export interface ChatState {
   error: string | null;
   state: "IDLE" | "SENDING" | "SUCCESS" | "ERROR";
   conversations: ConversationsList | null;
+  members: Partial<Participant>[];
+  locations: GetUserLocationsResponse[];
 }
 
 export interface FeedState {

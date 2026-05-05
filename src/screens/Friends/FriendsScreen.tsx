@@ -30,9 +30,13 @@ import Loading from "../../components/Loading";
 import ConfirmModal from "../../components/ConfirmModal";
 import { Feather } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../store";
+import { setMembers } from "../../store/chat/chatSlice";
 
 const FriendsScreen = () => {
   const { t } = useTranslation();
+  const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
   const [searchResult, setSearchResult] = useState<SearchFriendResponse | null>(
     null,
@@ -183,6 +187,19 @@ const FriendsScreen = () => {
     avatar: string | null,
     conversationId: string | null,
   ) => {
+    dispatch(
+      setMembers([
+        {
+          chatUserSnapshot: {
+            userId: id,
+            username: username,
+            fullName: fullName,
+            phoneNumber: "",
+            avatar: avatar,
+          },
+        },
+      ]),
+    );
     navigation.navigate("Chat", {
       id,
       username,

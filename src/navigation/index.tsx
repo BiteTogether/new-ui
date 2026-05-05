@@ -1,12 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-// Auth Screens
+
+// Screens
 import LoginScreen from "../screens/Authentication/LoginScreen";
 import InputScreen from "../screens/Authentication/InputScreen";
 import OTPScreen from "../screens/Authentication/OTPScreen";
 import RegisterScreen from "../screens/Authentication/RegisterScreen";
-// Main Screens
+
 import HomeScreen from "../screens/Feed/HomeScreen";
 import ChatScreen from "../screens/Chat/ChatScreen";
 import ProfileScreen from "../screens/Profile/ProfileScreen";
@@ -17,96 +18,151 @@ import CreateGroupChatScreen from "../screens/Chat/CreateGroupChatScreen";
 import GroupDetailScreen from "../screens/Chat/GroupDetailScreen";
 import AddMemberScreen from "../screens/Chat/AddMemberScreen";
 import CreatePostScreen from "../screens/Feed/CreatePostScreen";
+import VoteResultsScreen from "../screens/Chat/VoteResultsScreen";
+import BillResultsScreen from "../screens/Chat/BillResultsScreen";
 
+// Store
 import { useSelector, useDispatch } from "react-redux";
 import { loadToken } from "../store/auth/authSlice";
 import { userGetInfo } from "../store/user/userActions";
 import { AppDispatch, RootState } from "../store";
-import Loading from "../components/Loading";
+
+// Services
 import { ApiService } from "../services";
+import websocketService from "../services/webSocketService";
+import { updateUserState } from "../services/api/notiApi";
 import { userLogout } from "../store/auth/authActions";
+
+// Utils
+import Loading from "../components/Loading";
 import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
-import websocketService from "../services/webSocketService";
 import { AppState } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Stack = createNativeStackNavigator();
 
 export default function Navigation() {
-  const { isSignedIn } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
-  const { loadingToken, token } = useSelector((state: RootState) => state.auth);
+  const { isSignedIn, loadingToken, token } = useSelector(
+    (state: RootState) => state.auth,
+  );
   const { t, i18n } = useTranslation();
-  const handleGetInfo = async () => {
-    const resultAction = await dispatch(userGetInfo());
-    if (userGetInfo.rejected.match(resultAction)) {
-      console.error("Failed to get user info:", resultAction.payload);
-      Toast.show({
-        type: "error",
-        text1: t("network_error"),
-      });
+
+  // ===== Presence refs =====
+  const currentStateRef = useRef<
+    "FOREGROUND" | "BACKGROUND" | "OFFLINE" | null
+  >(null);
+  const appStateRef = useRef(AppState.currentState);
+  const isConnectedRef = useRef(true);
+
+  // ===== Safe API =====
+  const safeUpdateUserState = async (
+    newState: "FOREGROUND" | "BACKGROUND" | "OFFLINE",
+  ) => {
+    if (currentStateRef.current === newState) return;
+
+    currentStateRef.current = newState;
+
+    try {
+      await updateUserState(newState);
+    } catch (err) {
+      console.error("updateUserState error", err);
     }
   };
 
+  // ===== Combine logic =====
+  const updatePresence = () => {
+    if (!isConnectedRef.current) {
+      safeUpdateUserState("OFFLINE");
+    } else if (appStateRef.current === "active") {
+      safeUpdateUserState("FOREGROUND");
+    } else {
+      safeUpdateUserState("BACKGROUND");
+    }
+  };
+
+  // ===== Load language =====
   useEffect(() => {
     AsyncStorage.getItem("appLanguage").then((lang) => {
       if (lang) i18n.changeLanguage(lang);
     });
   }, []);
 
+  // ===== Load token =====
   useEffect(() => {
     dispatch(loadToken());
   }, []);
 
+  // ===== Get user info =====
   useEffect(() => {
     if (isSignedIn) {
-      handleGetInfo();
+      dispatch(userGetInfo()).then((res) => {
+        if (userGetInfo.rejected.match(res)) {
+          Toast.show({
+            type: "error",
+            text1: t("network_error"),
+          });
+        }
+      });
     }
   }, [isSignedIn]);
 
+  // ===== Logout handler =====
   useEffect(() => {
     ApiService.setLogoutHandler(() => {
       dispatch(userLogout());
     });
   }, []);
 
+  // ===== Presence system =====
   useEffect(() => {
-    if (token) {
-      // Monitor network connectivity
-      const unsubscribe = NetInfo.addEventListener((state) => {
-        if (state.isConnected) {
+    if (!token) return;
+
+    // Initial state
+    websocketService.connect(token);
+    safeUpdateUserState("FOREGROUND");
+
+    // Network listener
+    const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
+      isConnectedRef.current = !!state.isConnected;
+
+      if (state.isConnected) {
+        websocketService.connect(token);
+      } else {
+        websocketService.disconnect();
+      }
+
+      updatePresence();
+    });
+
+    // App state listener
+    const appStateSubscription = AppState.addEventListener(
+      "change",
+      (nextAppState) => {
+        appStateRef.current = nextAppState;
+
+        if (nextAppState === "active") {
           websocketService.connect(token);
         } else {
           websocketService.disconnect();
         }
-      });
 
-      // Monitor app state
-      const appStateSubscription = AppState.addEventListener(
-        "change",
-        (nextAppState) => {
-          if (nextAppState === "active") {
-            websocketService.connect(token);
-          } else if (nextAppState === "background") {
-            websocketService.disconnect();
-          }
-        },
-      );
+        updatePresence();
+      },
+    );
 
-      // Clean up listeners
-      return () => {
-        unsubscribe();
-        appStateSubscription.remove();
-        websocketService.disconnect();
-      };
-    }
+    // Cleanup
+    return () => {
+      unsubscribeNetInfo();
+      appStateSubscription.remove();
+      websocketService.disconnect();
+      safeUpdateUserState("OFFLINE");
+    };
   }, [token]);
 
-  if (loadingToken) {
-    return <Loading />;
-  }
+  if (loadingToken) return <Loading />;
 
   return (
     <NavigationContainer>
@@ -132,6 +188,8 @@ export default function Navigation() {
             <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
             <Stack.Screen name="AddMember" component={AddMemberScreen} />
             <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+            <Stack.Screen name="VoteResults" component={VoteResultsScreen} />
+            <Stack.Screen name="BillResults" component={BillResultsScreen} />
           </>
         ) : (
           <>

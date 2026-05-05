@@ -36,6 +36,10 @@ import { Feather } from "@expo/vector-icons";
 import { truncateText } from "../../utils/helpers";
 import ConfirmModal from "../../components/ConfirmModal";
 import SelectModal, { Option } from "../../components/SelectModal";
+import * as ImagePicker from "expo-image-picker";
+import { compressImageWithExpo } from "../../utils/image";
+import { UploadImage } from "../../types/user";
+import { uploadConversationAvatar } from "../../services/api/chatApi";
 
 const GroupDetailScreen = () => {
   const { t } = useTranslation();
@@ -60,6 +64,9 @@ const GroupDetailScreen = () => {
     "ADMIN" | "MEMBER" | null
   >(null);
   const [newGroupName, setNewGroupName] = useState<string>("");
+  const [avatar, setAvatar] = useState<string | null>(
+    groupInfo?.avatarUrl || null,
+  );
 
   const memberOptions: Option[] = [
     {
@@ -83,6 +90,7 @@ const GroupDetailScreen = () => {
       label: t("change_group_avatar"),
       onPress: () => {
         setShowSelectGroupModal(false);
+        pickImage();
       },
     },
     {
@@ -97,11 +105,80 @@ const GroupDetailScreen = () => {
       onPress: () => {
         setShowSelectGroupModal(false);
         navigation.navigate("AddMember", {
+          conversationId: groupInfo!.id,
           ids: groupMembers.map((m) => m.id),
         });
       },
     },
   ];
+
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library.
+    // Manually request permissions for videos on iOS when `allowsEditing` is set to `false`
+    // and `videoExportPreset` is `'Passthrough'` (the default), ideally before launching the picker
+    // so the app users aren't surprised by a system dialog after picking a video.
+    // See "Invoke permissions for videos" sub section for more details.
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Toast.show({
+        type: "error",
+        text1: t("permission_required"),
+        text2: t("media_library_permission_required"),
+      });
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      setAvatar(uri);
+      const res = await handleCompressImage(uri);
+      await handleUploadAvatar(res);
+    }
+  };
+
+  const handleCompressImage = async (uri: string) => {
+    try {
+      // Extract a simple filename (e.g., "photo.jpg")
+      const filename = uri.split("/").pop() || "image.jpg";
+      const compressedUri = await compressImageWithExpo(uri, filename);
+      if (compressedUri) {
+        return {
+          uri: compressedUri,
+          name: filename,
+          type: "image/webp",
+        };
+      } else {
+        console.error("Error", "Image compression failed.");
+      }
+    } catch (error) {
+      console.error("Compression process failed:", error);
+      console.error("Error", "An error occurred during compression.");
+    }
+  };
+
+  const handleUploadAvatar = async (compressedImage: UploadImage) => {
+    if (!compressedImage) return;
+    const res = await uploadConversationAvatar(groupInfo!.id, compressedImage);
+    if (res.status === 200 && res.data) {
+      setAvatar(res.data.avatarUrl as string);
+      return res.data.avatarUrl as string;
+    } else {
+      Toast.show({
+        type: "error",
+        text1: t("avatar_upload_failed"),
+      });
+      throw new Error(res.message);
+    }
+  };
 
   const handleSelectMember = (memberId: number) => {
     setSelectedMemberId(memberId);
@@ -195,7 +272,6 @@ const GroupDetailScreen = () => {
         userUpdateConversation({
           conversationId: groupInfo!.id,
           name: trimmedName,
-          avatarUrl: groupInfo?.avatarUrl,
         }),
       ).unwrap();
       setGroupInfo((prev) => (prev ? { ...prev, name: trimmedName } : prev));
@@ -248,6 +324,7 @@ const GroupDetailScreen = () => {
   useEffect(() => {
     if (groupInfo) {
       setNewGroupName(groupInfo.name);
+      setAvatar(groupInfo.avatarUrl);
     }
   }, [groupInfo]);
 
@@ -259,7 +336,7 @@ const GroupDetailScreen = () => {
         onPressOption={handlePressOption}
       />
       <View style={styles.avatar_container}>
-        <Avatar size={100} />
+        <Avatar uri={avatar} size={100} />
         <View
           style={{
             marginVertical: 16,

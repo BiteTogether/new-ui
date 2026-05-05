@@ -35,12 +35,14 @@ export const API_ENDPOINTS = {
       DELETE: "/api/v1/conversations/{conversationId}",
       GET_LIST: "/api/v1/conversations",
       CREATE: "/api/v1/conversations",
-      ADD_USER: "/api/v1/conversations/{conversationId}/participants/{userId}",
+      ADD_USER: "/api/v1/conversations/{conversationId}/participants",
       REMOVE_USER:
         "/api/v1/conversations/{conversationId}/participants/{userId}",
       UPDATE_ROLE:
         "/api/v1/conversations/{conversationId}/participants/{userId}/role",
       GET_BY_ID: "/api/v1/conversations/{conversationId}",
+      UPLOAD_AVATAR: "/api/v1/conversations/{conversationId}/avatar",
+      GET_LOCATIONS: "/api/v1/conversations/{conversationId}/locations",
     },
     MESSAGES: {
       UPDATE: "/api/v1/messages/{messageId}",
@@ -48,11 +50,25 @@ export const API_ENDPOINTS = {
       SEND: "/api/v1/messages",
       GET_LIST: "/api/v1/messages/conversation/{conversationId}",
     },
+    VOTE: {
+      CREATE: "/api/v1/votes",
+      CLOSE: "/api/v1/votes/{voteSessionId}/close",
+      CAST: "/api/v1/votes/{voteSessionId}/cast",
+      GET: "/api/v1/votes/conversation/{conversationId}",
+      GET_BY_ID: "/api/v1/votes/{voteSessionId}",
+    },
+    BILL: {
+      CREATE: "/api/v1/bills",
+      CONFIRM_PAYMENT: "/api/v1/bills/{billSessionId}/payments",
+      FINALIZE: "/api/v1/bills/{billSessionId}/finalize",
+      GET: "/api/v1/bills/conversation/{conversationId}",
+      GET_BY_ID: "/api/v1/bills/{billSessionId}",
+    },
   },
   FEED: {
     POST: {
       CREATE: "/api/v1/feeds",
-      GET: "/api/v1/feeds/new-feeds",
+      GET: "/api/v1/feeds/new-feeds/location",
       DELETE: "/api/v1/feeds/{id}",
       GET_BY_ID: "/api/v1/feeds/{id}",
       GET_BY_USERID: "/api/v1/feeds/user/{userId}",
@@ -66,5 +82,8 @@ export const API_ENDPOINTS = {
       GET: "/api/v1/feeds/saved-posts",
       DELETE: "/api/v1/feeds/saved-posts/{postId}",
     },
+  },
+  NOTI: {
+    USER_STATE: "/api/v1/user-state",
   },
 };
