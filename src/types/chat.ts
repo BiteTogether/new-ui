@@ -81,7 +81,7 @@ export interface AddUserToConversationResponse {
 export interface GetUserLocationsResponse {
   conversationId: string;
   userId: number;
-  fullName: string;
+  fullname: string;
   avatar: string | null;
   lat: number;
   lng: number;

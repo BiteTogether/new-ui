@@ -19,7 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#262626"
+        "backgroundColor": "#fff"
       },
       "predictiveBackGestureEnabled": false,
       "googleServicesFile": "./google-services.json",

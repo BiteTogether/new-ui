@@ -208,7 +208,7 @@ const HomeScreen = () => {
         subscription = await Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.High,
-            timeInterval: 2000,
+            timeInterval: 5000,
             distanceInterval: 10,
           },
           (location) => {
@@ -227,16 +227,23 @@ const HomeScreen = () => {
               longitudeDelta: 0.015,
             });
 
-            const sharing = sharingRef.current;
-            if (sharing?.isSharing && sharing.conversationId) {
+            const list = Array.isArray(sharingRef.current)
+              ? sharingRef.current
+              : [];
+
+            const activeConversations = list.filter(
+              (item) => item.isSharing && item.conversationId,
+            );
+
+            activeConversations.forEach((item) => {
               sendLocation({
-                conversationId: sharing.conversationId,
+                conversationId: item.conversationId,
                 location: {
                   latitude: location.coords.latitude,
                   longitude: location.coords.longitude,
                 },
               });
-            }
+            });
           },
         );
       }
@@ -249,10 +256,9 @@ const HomeScreen = () => {
     }, []),
   );
 
-  const sharingRef = useRef<{
-    conversationId: string;
-    isSharing: boolean;
-  } | null>(null);
+  const sharingRef = useRef<{ conversationId: string; isSharing: boolean }[]>(
+    [],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -261,9 +267,8 @@ const HomeScreen = () => {
           "CONVERSATION_LOCATION_SHARING",
         );
 
-        if (data) {
-          sharingRef.current = JSON.parse(data);
-        }
+        const parsed = data ? JSON.parse(data) : [];
+        sharingRef.current = Array.isArray(parsed) ? parsed : [];
       };
 
       loadSharing();

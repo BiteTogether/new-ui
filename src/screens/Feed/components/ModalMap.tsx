@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { StyleSheet, TouchableOpacity, Image, View, Text } from "react-native";
-import { Region, Marker, Callout } from "react-native-maps";
+import { Region, Marker } from "react-native-maps";
 import { colors } from "../../../utils/constants";
 import FocusIcon from "../../../../assets/icons/FocusIcon";
 import { Posts, Post } from "../../../types/feed";
@@ -97,7 +97,10 @@ const ModalMap = ({
                 longitude: Number(location.lng),
               }}
             >
-              <View style={{ alignItems: "center" }}>
+              <View style={{ alignItems: "center", gap: 4 }}>
+                <View style={styles.content_container}>
+                  <Text>{truncateText(location.fullname, 20)}</Text>
+                </View>
                 <Image
                   source={{ uri: location?.avatar }}
                   style={styles.avatar}

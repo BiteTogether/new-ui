@@ -185,5 +185,9 @@
 "enter_vote_name": "Enter vote name",
 "send_location": "Send location",
 "stop_send_location": "Stop sending location",
-"view_members_location": "View members' location"
+"view_members_location": "View members' location",
+"enter_amount": "Enter amount",
+"create_bill_success": "Bill created successfully.",
+"create_bill_error": "Failed to create bill. Please try again.",
+"sharing_location": "You are sharing your location"
 }

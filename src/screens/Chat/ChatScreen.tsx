@@ -53,6 +53,8 @@ import BillStickyBar from "./components/BillStickyBar";
 import CreateBillModal from "./components/CreateBillModal";
 import BillDetailModal from "./components/BillDetailModal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import SharingLocationStickyBar from "./components/SharingLocationStickyBar";
+import { LOCATION_KEY } from "../../utils/key";
 
 const ChatScreen = () => {
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
@@ -266,6 +268,44 @@ const ChatScreen = () => {
     }
   };
 
+  const saveSharing = async (conId: string, isSharing: boolean) => {
+    try {
+      const oldData = await AsyncStorage.getItem(LOCATION_KEY);
+      const list = oldData ? JSON.parse(oldData) : [];
+
+      // Check if conversation already exists in the list
+      const index = list.findIndex(
+        (item: any) => item.conversationId === conId,
+      );
+      if (index !== -1) {
+        // update
+        list[index].isSharing = isSharing;
+      } else {
+        // add new
+        list.push({
+          conversationId: conId,
+          isSharing,
+        });
+      }
+
+      await AsyncStorage.setItem(LOCATION_KEY, JSON.stringify(list));
+    } catch (err) {
+      console.log("Save sharing error:", err);
+    }
+  };
+
+  const removeSharing = async (conId: string) => {
+    try {
+      const data = await AsyncStorage.getItem(LOCATION_KEY);
+      if (!data) return;
+      const list = JSON.parse(data);
+      const newList = list.filter((item: any) => item.conversationId !== conId);
+      await AsyncStorage.setItem(LOCATION_KEY, JSON.stringify(newList));
+    } catch (err) {
+      console.log("Remove sharing error:", err);
+    }
+  };
+
   const handleSendLocation = async () => {
     setShowPlusModal(false);
     try {
@@ -278,13 +318,7 @@ const ChatScreen = () => {
               longitude: userLocation.longitude,
             },
           });
-          await AsyncStorage.setItem(
-            "CONVERSATION_LOCATION_SHARING",
-            JSON.stringify({
-              conversationId: conId,
-              isSharing: myLocation?.sharing || false,
-            }),
-          );
+          await saveSharing(conId, myLocation?.sharing || false);
         } else {
           await sendLocation({
             conversationId: conId,
@@ -294,7 +328,7 @@ const ChatScreen = () => {
             },
             isSharing: false,
           });
-          await AsyncStorage.removeItem("CONVERSATION_LOCATION_SHARING");
+          await removeSharing(conId);
         }
       }
     } catch (error) {
@@ -627,6 +661,10 @@ const ChatScreen = () => {
             (bill) => bill.status !== "SETTLED",
           )}
           onSelectBill={handleSelectBill}
+        />
+        <SharingLocationStickyBar
+          isSharing={isSharing || false}
+          onPress={() => setShowPlusModal(true)}
         />
 
         {loading && (

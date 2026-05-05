@@ -185,5 +185,9 @@
 "enter_vote_name": "Nhập tên cuộc thăm dò",
 "send_location": "Gửi vị trí",
 "stop_send_location": "Dừng gửi vị trí",
-"view_members_location": "Xem vị trí thành viên"
+"view_members_location": "Xem vị trí thành viên",
+"enter_amount": "Nhập số tiền",
+"create_bill_success": "Tạo hóa đơn thành công.",
+"create_bill_error": "Tạo hóa đơn thất bại. Vui lòng thử lại.",
+"sharing_location": "Bạn đang chia sẻ vị trí của mình"
 }
