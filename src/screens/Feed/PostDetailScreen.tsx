@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  FlatList,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
@@ -36,13 +37,19 @@ import {
   userCreateConversation,
 } from "../../store/chat/chatActions";
 import { formatDate } from "../../utils/helpers";
+import Loading from "../../components/Loading";
 
 interface PostDetailScreenProps {
   post: Post;
   onDeletePost: (postId: string) => void;
+  isLoading: boolean;
 }
 
-const PostDetailScreen = ({ post, onDeletePost }: PostDetailScreenProps) => {
+const PostDetailScreen = ({
+  post,
+  onDeletePost,
+  isLoading,
+}: PostDetailScreenProps) => {
   const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
   const dispatch = useDispatch<AppDispatch>();
@@ -53,6 +60,12 @@ const PostDetailScreen = ({ post, onDeletePost }: PostDetailScreenProps) => {
   const [showSelectModal, setShowSelectModal] = useState<boolean>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [conId, setConId] = useState<string | null>(null);
+
+  const uniqueNearbyCheckins = Array.from(
+    new Map(
+      [...post.nearbyCheckins].reverse().map((item) => [item.userId, item]),
+    ).values(),
+  ).reverse();
 
   // Double tap logic
   const lastTap = useRef<number>(0);
@@ -187,6 +200,8 @@ const PostDetailScreen = ({ post, onDeletePost }: PostDetailScreenProps) => {
     };
     handleCreateConversation();
   }, [conId]);
+
+  if (isLoading) return <Loading />;
 
   return (
     <View style={styles.container}>
@@ -337,6 +352,42 @@ const PostDetailScreen = ({ post, onDeletePost }: PostDetailScreenProps) => {
             type="chat"
             onSend={handleSendMessage}
             placeholder={t("send_messages")}
+          />
+        </View>
+      )}
+
+      {uniqueNearbyCheckins.length > 0 && (
+        <View>
+          <Text
+            style={{
+              marginTop: 16,
+              marginBottom: 8,
+              color: colors.text,
+              fontSize: fonts.size.medium,
+              fontWeight: "600",
+            }}
+          >
+            {uniqueNearbyCheckins.length} {t("people_checked_in_nearby")}
+          </Text>
+          <FlatList
+            keyExtractor={(item) => item.postId}
+            data={uniqueNearbyCheckins}
+            showsHorizontalScrollIndicator={false}
+            horizontal
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate("Home", { postId: item.postId });
+                }}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginHorizontal: 4,
+                }}
+              >
+                <Avatar uri={item.avatar} size={40} />
+              </TouchableOpacity>
+            )}
           />
         </View>
       )}

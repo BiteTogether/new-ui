@@ -61,6 +61,7 @@ const HomeScreen = () => {
   const SavedPostsRef = useRef<Modalize>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [loadingSavedPosts, setLoadingSavedPosts] = useState<boolean>(true);
+  const [loadingPostDetail, setLoadingPostDetail] = useState<boolean>(false);
   const route = useRoute<RouteProp<MainStackParamList, "Home">>();
 
   const [behaviour, setBehaviour] = useState<"height" | undefined>("height");
@@ -282,6 +283,7 @@ const HomeScreen = () => {
 
   useEffect(() => {
     const handleFetchPostDetail = async (postId: string) => {
+      setLoadingPostDetail(true);
       try {
         const post = await dispatch(userGetPostDetail(postId)).unwrap();
 
@@ -297,6 +299,8 @@ const HomeScreen = () => {
           type: "error",
           text1: t("fetch_post_detail_error"),
         });
+      } finally {
+        setLoadingPostDetail(false);
       }
     };
     // If there's a postId in route params, try to fetch the post detail
@@ -379,13 +383,14 @@ const HomeScreen = () => {
 
         <Modalize
           ref={PostDetailRef}
-          modalHeight={700}
+          modalHeight={750}
           modalStyle={styles.modal_container}
         >
           <View style={{ height: 700 }}>
             <PostDetailScreen
               post={selectedPost}
               onDeletePost={handleDeletePost}
+              isLoading={loadingPostDetail}
             />
           </View>
         </Modalize>

@@ -28,6 +28,15 @@ export interface Post {
     createdAt: string;
     updatedAt: string;
   };
+  nearbyCheckins: NearbyCheckIn[];
+}
+
+export interface NearbyCheckIn {
+  userId: number;
+  fullName: string;
+  avatar: string;
+  postId: string;
+  placeName: string;
 }
 
 export interface CreatePostRequest {
@@ -49,5 +58,3 @@ export interface GetPostsRequest {
   latitudeDelta: number;
   longitudeDelta: number;
 }
-
-// Like
