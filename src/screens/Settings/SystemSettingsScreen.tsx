@@ -1,15 +1,17 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, Text, View, TouchableOpacity, Switch } from "react-native";
 import { colors, fonts } from "../../utils/constants";
 import TopBar from "../../components/TopBar";
 import { useTranslation } from "react-i18next";
 import { Feather } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getPushEnabled, updatePushEnabled } from "../../services/api/notiApi";
 
 const SystemSettingsScreen = () => {
   const { t, i18n } = useTranslation();
   const [currentLang, setCurrentLang] = useState(i18n.language);
+  const [isNotificationEnabled, setIsNotificationEnabled] = useState(true);
 
   const handleChangeLanguage = async () => {
     const newLang = currentLang === "en" ? "vi" : "en";
@@ -21,6 +23,41 @@ const SystemSettingsScreen = () => {
       text1: t("language_change_success"),
     });
   };
+
+  const handleToggleNotification = async () => {
+    const newValue = !isNotificationEnabled;
+
+    // update UI optimistically
+    setIsNotificationEnabled(newValue);
+    try {
+      await updatePushEnabled(newValue);
+      Toast.show({
+        type: "success",
+        text1: newValue ? t("notification_on") : t("notification_off"),
+      });
+    } catch (error) {
+      // rollback if API call fails
+      console.error("Error updating push setting", error);
+      setIsNotificationEnabled(!newValue);
+      Toast.show({
+        type: "error",
+        text1: t("error_occurred"),
+      });
+    }
+  };
+
+  useEffect(() => {
+    const fetchSetting = async () => {
+      try {
+        const res = await getPushEnabled();
+        setIsNotificationEnabled(res.data as boolean);
+      } catch (error) {
+        console.error("Error in fetching push setting", error);
+      }
+    };
+
+    fetchSetting();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -41,6 +78,22 @@ const SystemSettingsScreen = () => {
             </Text>
           </View>
         </TouchableOpacity>
+
+        <View
+          style={[styles.func_container, { justifyContent: "space-between" }]}
+        >
+          <View style={styles.func_container}>
+            <Feather name="bell" size={24} color={colors.text} />
+            <Text style={styles.func_text}>{t("notification")}</Text>
+          </View>
+
+          <Switch
+            value={isNotificationEnabled}
+            onValueChange={handleToggleNotification}
+            trackColor={{ false: "#ccc", true: colors.primary }}
+            thumbColor={"#fff"}
+          />
+        </View>
       </View>
     </View>
   );

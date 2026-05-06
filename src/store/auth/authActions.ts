@@ -7,6 +7,8 @@ import {
   deleteRefreshToken,
 } from "../../utils/secureStore";
 import { LoginRequest, RegisterRequest } from "../../types/auth";
+import { getFcmToken, deleteFcmToken } from "../../utils/secureStore";
+import { updateDeviceToken } from "../../services/api/notiApi";
 
 export const userLogin = createAsyncThunk(
   "auth/login",
@@ -21,6 +23,13 @@ export const userLogin = createAsyncThunk(
         // Store tokens securely using SecureStore
         await saveToken(response.data.access_token);
         await saveRefreshToken(response.data.refresh_token);
+
+        // Get FCM token and update device token on the server
+        const fcmToken = await getFcmToken();
+        if (fcmToken) {
+          await updateDeviceToken(fcmToken);
+        }
+
         return response.data;
       }
       return rejectWithValue(response.message);
@@ -47,6 +56,13 @@ export const userRegister = createAsyncThunk(
         // Store tokens securely using SecureStore
         await saveToken(response.data.access_token);
         await saveRefreshToken(response.data.refresh_token);
+
+        // Get FCM token and update device token on the server
+        const fcmToken = await getFcmToken();
+        if (fcmToken) {
+          await updateDeviceToken(fcmToken);
+        }
+
         return response.data;
       }
       return rejectWithValue(response.message);
@@ -76,6 +92,7 @@ export const userLogout = createAsyncThunk(
       // Always clear tokens, even if API fails
       await deleteToken();
       await deleteRefreshToken();
+      await deleteFcmToken();
       if (error.response?.data?.message) {
         return rejectWithValue(error.response.data.message);
       } else {

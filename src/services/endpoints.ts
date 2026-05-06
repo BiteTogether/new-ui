@@ -85,5 +85,8 @@ export const API_ENDPOINTS = {
   },
   NOTI: {
     USER_STATE: "/api/v1/user-state",
+    DEVICE_TOKEN: "/api/v1/notifications/settings/device-token",
+    GET_PUSH_ENABLED: "/api/v1/notifications/settings/push-enabled",
+    UPDATE_PUSH_ENABLED: "/api/v1/notifications/settings/push-enabled",
   },
 };

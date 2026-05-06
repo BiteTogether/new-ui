@@ -6,8 +6,10 @@ import Navigation from "./src/navigation";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import "./src/utils/i18n";
+import { useNotification } from "./src/hooks/useNotification";
 
 export default function App() {
+  useNotification();
   return (
     <Provider store={store}>
       <SafeAreaProvider>
