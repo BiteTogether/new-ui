@@ -189,5 +189,9 @@
 "enter_amount": "Nhập số tiền",
 "create_bill_success": "Tạo hóa đơn thành công.",
 "create_bill_error": "Tạo hóa đơn thất bại. Vui lòng thử lại.",
-"sharing_location": "Bạn đang chia sẻ vị trí của mình"
+"sharing_location": "Bạn đang chia sẻ vị trí của mình",
+"people_checked_in_nearby": "bạn bè đã ghé thăm địa điểm này",
+"notification": "Thông báo",
+"notification_on": "Đã bật thông báo",
+"notification_off": "Đã tắt thông báo"
 }

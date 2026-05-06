@@ -11,6 +11,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import { GetUserLocationsResponse } from "../../../types/chat";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
+import Avatar from "../../../components/Avatar";
 
 interface ModalMapProps {
   region?: Region;
@@ -79,10 +80,7 @@ const ModalMap = ({
                 <Text>{truncateText(marker.content, 20)}</Text>
               </View>
 
-              <Image
-                source={{ uri: marker.user?.avatar }}
-                style={styles.avatar}
-              />
+              <Avatar uri={marker.user.avatar} size={50} />
             </View>
           </Marker>
         ))}
@@ -101,10 +99,8 @@ const ModalMap = ({
                 <View style={styles.content_container}>
                   <Text>{truncateText(location.fullname, 20)}</Text>
                 </View>
-                <Image
-                  source={{ uri: location?.avatar }}
-                  style={styles.avatar}
-                />
+
+                <Avatar uri={location?.avatar} size={50} />
               </View>
             </Marker>
           ))}

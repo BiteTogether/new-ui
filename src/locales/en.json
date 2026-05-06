@@ -189,5 +189,9 @@
 "enter_amount": "Enter amount",
 "create_bill_success": "Bill created successfully.",
 "create_bill_error": "Failed to create bill. Please try again.",
-"sharing_location": "You are sharing your location"
+"sharing_location": "You are sharing your location",
+"people_checked_in_nearby": "friends visited this place",
+"notification": "Notification",
+"notification_on": "Notifications turned on",
+"notification_off": "Notifications turned off"
 }
