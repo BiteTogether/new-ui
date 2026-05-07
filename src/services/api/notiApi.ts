@@ -16,7 +16,7 @@ export const updateDeviceToken = (deviceToken: string) => {
 };
 
 export const getPushEnabled = () => {
-  return apiService.get<boolean>(API_ENDPOINTS.NOTI.GET_PUSH_ENABLED);
+  return apiService.get(API_ENDPOINTS.NOTI.GET_PUSH_ENABLED);
 };
 
 export const updatePushEnabled = (pushNotificationEnabled: boolean) => {
