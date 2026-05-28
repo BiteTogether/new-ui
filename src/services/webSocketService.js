@@ -1,5 +1,4 @@
 // websocketService.js
-import Config from "react-native-config";
 class WebSocketService {
   static instance = null;
   callbacks = {};
@@ -26,7 +25,7 @@ class WebSocketService {
       return;
     }
 
-    const wsUrl = `${Config.CHAT_SOCKET_URL}?jwt=${token}`;
+    const wsUrl = `${process.env.EXPO_PUBLIC_CHAT_SOCKET_URL}?jwt=${token}`;
     this.socketRef = new WebSocket(wsUrl, ['jwt']);
 
     

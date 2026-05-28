@@ -1,6 +1,5 @@
 import axios from "axios";
-import Config from "react-native-config";
-const KEY = Config.VIETMAP_API_KEY;
+const KEY = process.env.EXPO_PUBLIC_VIETMAP_API_KEY;
 // Vietmap autocomplete API
 export const searchNearbyRestaurants = async (
   latitude: number,

@@ -171,27 +171,29 @@ export class ApiService {
     }
   }
 
-  private handleError(error: any): ApiResponse<any> {
-    if (error.response) {
-      // Server responded with error status
-      return {
-        status: error.response.status || 500,
-        message: error.response.data?.message || "Server error occurred",
-      };
-    } else if (error.request) {
-      // Network error
-      return {
-        status: 0,
-        message:
-          String(error) || "Network error. Please check your connection.",
-      };
-    } else {
-      // Other error
-      return {
-        status: 0,
-        message: String(error.message) || "An unexpected error occurred",
-      };
+  private handleError(error: any): never {
+    console.error("========== API ERROR ==========");
+
+    console.error("MESSAGE:", error?.message);
+
+    if (error?.config) {
+      console.error(
+        "URL:",
+        `${error.config.baseURL ?? ""}${error.config.url ?? ""}`,
+      );
     }
+
+    if (error?.response) {
+      console.error("STATUS:", error.response.status);
+
+      console.error("RESPONSE:", JSON.stringify(error.response.data, null, 2));
+    }
+
+    if (error?.request) {
+      console.error("REQUEST:", error.request);
+    }
+
+    throw error;
   }
 
   // Upload file method for images
