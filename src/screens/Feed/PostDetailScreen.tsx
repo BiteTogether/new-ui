@@ -63,7 +63,9 @@ const PostDetailScreen = ({
 
   const uniqueNearbyCheckins = Array.from(
     new Map(
-      [...post.nearbyCheckins].reverse().map((item) => [item.userId, item]),
+      [...(post.nearbyCheckins ?? [])]
+        .reverse()
+        .map((item) => [item.userId, item]),
     ).values(),
   ).reverse();
 

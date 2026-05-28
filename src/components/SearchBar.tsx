@@ -59,7 +59,7 @@ const SearchBar = ({
         );
         if (res?.status === 200 && res.data) {
           if (Array.isArray(res.data)) {
-            const filtered = res.data.filter((item) => item.distance <= 10);
+            const filtered = res.data.filter((item) => item.distance <= 0.5);
             setSearchResult(filtered);
           } else {
             setSearchResult([]);

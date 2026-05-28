@@ -28,7 +28,7 @@ export interface Post {
     createdAt: string;
     updatedAt: string;
   };
-  nearbyCheckins: NearbyCheckIn[];
+  nearbyCheckins: NearbyCheckIn[] | null;
 }
 
 export interface NearbyCheckIn {
