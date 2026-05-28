@@ -224,7 +224,31 @@ const chatSlice = createSlice({
       .addCase(userGetLocations.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
-        state.locations = action.payload;
+        const incomingLocations = Array.isArray(action.payload)
+          ? action.payload
+          : [];
+
+        incomingLocations.forEach((incoming) => {
+          if (incoming.sharing === false) {
+            state.locations = state.locations.filter(
+              (loc) => loc.userId !== incoming.userId,
+            );
+            return;
+          }
+
+          const index = state.locations.findIndex(
+            (loc) => loc.userId === incoming.userId,
+          );
+
+          if (index !== -1) {
+            state.locations[index] = {
+              ...state.locations[index],
+              ...incoming,
+            };
+          } else {
+            state.locations.push(incoming);
+          }
+        });
       })
       .addCase(userGetLocations.rejected, (state, action) => {
         state.loading = false;

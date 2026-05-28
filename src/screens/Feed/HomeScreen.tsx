@@ -38,6 +38,10 @@ import {
   userGetPostDetail,
   userDeletePost,
 } from "../../store/feed/feedActions";
+import {
+  userGetConversations,
+  userGetLocations,
+} from "../../store/chat/chatActions";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { setUserLocation } from "../../store/user/userSlice";
 import { useWebSocket } from "../../hooks/useWebSocket";
@@ -161,7 +165,7 @@ const HomeScreen = () => {
     handleFetchPosts,
   ]);
 
-  const handlePressRestaurant = (restaurant: any) => {
+  const handlePressRestaurant = () => {
     // Handle restaurant press, e.g., navigate to details screen
   };
 
@@ -183,7 +187,7 @@ const HomeScreen = () => {
       return;
     }
 
-    let result = await ImagePicker.launchCameraAsync({
+    const result = await ImagePicker.launchCameraAsync({
       aspect: [1, 1],
       quality: 1,
     });
@@ -198,12 +202,29 @@ const HomeScreen = () => {
     }
   };
 
+  const sharingRef = useRef<{ conversationId: string; isSharing: boolean }[]>(
+    [],
+  );
+
   useFocusEffect(
     useCallback(() => {
-      let subscription: Location.LocationSubscription;
+      let subscription: Location.LocationSubscription | null = null;
 
-      async function subscribeLocation() {
-        let { status } = await Location.requestForegroundPermissionsAsync();
+      const subscribeLocation = async () => {
+        // Load persisted sharing settings first so the watcher knows which
+        // conversations need location updates immediately after focus.
+        try {
+          const data = await AsyncStorage.getItem(
+            "CONVERSATION_LOCATION_SHARING",
+          );
+          const parsed = data ? JSON.parse(data) : [];
+          sharingRef.current = Array.isArray(parsed) ? parsed : [];
+        } catch (err) {
+          console.error("Failed to load sharing settings:", err);
+          sharingRef.current = [];
+        }
+
+        const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") return;
 
         subscription = await Location.watchPositionAsync(
@@ -247,9 +268,9 @@ const HomeScreen = () => {
             });
           },
         );
-      }
+      };
 
-      subscribeLocation();
+      void subscribeLocation();
 
       return () => {
         if (subscription) subscription.remove();
@@ -257,23 +278,29 @@ const HomeScreen = () => {
     }, []),
   );
 
-  const sharingRef = useRef<{ conversationId: string; isSharing: boolean }[]>(
-    [],
-  );
-
   useFocusEffect(
     useCallback(() => {
-      const loadSharing = async () => {
-        const data = await AsyncStorage.getItem(
-          "CONVERSATION_LOCATION_SHARING",
-        );
+      const hydrateMemberLocations = async () => {
+        try {
+          const conversationsRes = await dispatch(
+            userGetConversations({}),
+          ).unwrap();
+          const conversationIds = (conversationsRes?.conversations ?? [])
+            .map((conversation: { id: string }) => conversation.id)
+            .filter(Boolean);
 
-        const parsed = data ? JSON.parse(data) : [];
-        sharingRef.current = Array.isArray(parsed) ? parsed : [];
+          await Promise.allSettled(
+            conversationIds.map((id: string) =>
+              dispatch(userGetLocations(id)).unwrap(),
+            ),
+          );
+        } catch (error) {
+          console.error("Error hydrating member locations:", error);
+        }
       };
 
-      loadSharing();
-    }, []),
+      void hydrateMemberLocations();
+    }, [dispatch]),
   );
 
   // Fetch posts when mapRegion changes with debounce
@@ -318,7 +345,7 @@ const HomeScreen = () => {
         <ModalMap
           region={mapRegion}
           setRegion={setMapRegion}
-          gpsRegion={userLocation}
+          gpsRegion={userLocation ?? undefined}
           membersLocations={locations}
           posts={posts}
           onPressMarker={handleOpenPostDetail}
@@ -344,7 +371,7 @@ const HomeScreen = () => {
 
             renderItem: ({ item }) => (
               <TouchableOpacity
-                onPress={() => handlePressRestaurant(item)}
+                onPress={handlePressRestaurant}
                 style={searchScreenStyles.itemBtn}
               >
                 <View>
@@ -388,7 +415,7 @@ const HomeScreen = () => {
         >
           <View style={{ height: 700 }}>
             <PostDetailScreen
-              post={selectedPost}
+              post={selectedPost as Post}
               onDeletePost={handleDeletePost}
               isLoading={loadingPostDetail}
             />

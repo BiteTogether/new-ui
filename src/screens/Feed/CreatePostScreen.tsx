@@ -29,6 +29,13 @@ import { userCreatePost } from "../../store/feed/feedActions";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
 
+interface NearbyRestaurant {
+  ref_id: string;
+  name: string;
+  address: string;
+  distance?: number;
+}
+
 const CreatePostScreen = () => {
   const screenWidth = Dimensions.get("window").width;
   const imageSize = screenWidth * 0.9;
@@ -42,8 +49,11 @@ const CreatePostScreen = () => {
   );
   const [isCompressing, setIsCompressing] = useState<boolean>(false);
   const [isUpLoading, setIsUpLoading] = useState<boolean>(false);
-  const [nearbyRestaurants, setNearbyRestaurants] = useState<any[]>([]);
-  const [selectedRestaurant, setSelectedRestaurant] = useState<any>(null);
+  const [nearbyRestaurants, setNearbyRestaurants] = useState<
+    NearbyRestaurant[]
+  >([]);
+  const [selectedRestaurant, setSelectedRestaurant] =
+    useState<NearbyRestaurant | null>(null);
   const [searchText, setSearchText] = useState<string>("");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [content, setContent] = useState<string>("");
@@ -88,8 +98,10 @@ const CreatePostScreen = () => {
     }
   };
 
-  const handleUploadImage = async () => {
-    if (!compressedImage) return;
+  const handleUploadImage = async (): Promise<string> => {
+    if (!compressedImage) {
+      throw new Error("No compressed image available");
+    }
     const res = await uploadImage(compressedImage);
     if (res.status === 200 && res.data) {
       setCompressedImage(null);
@@ -104,9 +116,11 @@ const CreatePostScreen = () => {
   };
 
   const handleCreatePost = async () => {
+    const placeName = selectedRestaurant?.name?.trim() || searchText.trim();
+
     if (
       !compressedImage ||
-      !selectedRestaurant ||
+      !placeName ||
       content.trim() === "" ||
       rating === 0
     ) {
@@ -120,13 +134,16 @@ const CreatePostScreen = () => {
     setIsUpLoading(true);
     try {
       const imageUrl = await handleUploadImage();
+      if (!imageUrl) {
+        throw new Error("Image upload failed");
+      }
       const trimmedContent = content.trim();
 
       await dispatch(
         userCreatePost({
-          placeId: selectedRestaurant.ref_id,
-          placeName: selectedRestaurant.name,
-          placeAddress: selectedRestaurant.address,
+          placeId: selectedRestaurant?.ref_id ?? "",
+          placeName,
+          placeAddress: selectedRestaurant?.address ?? "",
           latitude: latitude,
           longitude: longitude,
           content: trimmedContent,
@@ -168,13 +185,29 @@ const CreatePostScreen = () => {
           type="search_nearby"
           placeholder={t("enter_restaurant_name")}
           setSearchResult={(results) => {
-            setNearbyRestaurants(results);
-            if (Array.isArray(results) && results.length > 0)
+            if (Array.isArray(results)) {
+              setNearbyRestaurants(results);
+              if (results.length > 0) {
+                setModalVisible(true);
+              } else {
+                setModalVisible(false);
+                setSelectedRestaurant(null);
+              }
+            } else {
+              setNearbyRestaurants([]);
+              setModalVisible(false);
+              setSelectedRestaurant(null);
+            }
+            if (Array.isArray(results) && results.length > 0) {
               setModalVisible(true);
+            }
           }}
           hideIcon={true}
           value={searchText}
-          onChangeText={setSearchText}
+          onChangeText={(text) => {
+            setSearchText(text);
+            setSelectedRestaurant(null);
+          }}
           location={latitude && longitude ? { latitude, longitude } : undefined}
         />
       </View>

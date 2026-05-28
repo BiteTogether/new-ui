@@ -246,7 +246,7 @@ const ChatListScreen = () => {
             data={conversationsList ? conversationsList.conversations : []}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            scrollEnabled={false}
+            // scrollEnabled={false}
             onEndReached={handleLoadMore}
             onEndReachedThreshold={0.1}
             renderItem={({ item }) => (

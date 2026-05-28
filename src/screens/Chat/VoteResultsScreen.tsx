@@ -25,6 +25,29 @@ import { useTranslation } from "react-i18next";
 import Toast from "react-native-toast-message";
 import ConfirmModal from "../../components/ConfirmModal";
 
+const normalizeVoteSessions = (sessions: VoteList): VoteList => {
+  const seenIds = new Set<string>();
+
+  return sessions
+    .filter((session) => {
+      if (!session || !session.id) return false;
+      if (seenIds.has(session.id)) return false;
+
+      seenIds.add(session.id);
+      return true;
+    })
+    .sort((a, b) => {
+      if (a.status !== b.status) {
+        return a.status === "OPEN" ? -1 : 1;
+      }
+
+      return (
+        new Date(b.createdAt ?? 0).getTime() -
+        new Date(a.createdAt ?? 0).getTime()
+      );
+    });
+};
+
 const VoteResultsScreen = () => {
   const { votes } = useWebSocket("VOTE_UPDATE") as { votes: VoteList };
   const { t } = useTranslation();
@@ -32,7 +55,9 @@ const VoteResultsScreen = () => {
   const { userInfo } = useSelector((state: RootState) => state.user);
   const route = useRoute<RouteProp<MainStackParamList, "VoteResults">>();
   const { conversationId } = route.params;
-  const [voteSessions, setVoteSessions] = useState<VoteList>(votes);
+  const [voteSessions, setVoteSessions] = useState<VoteList>(
+    normalizeVoteSessions(Array.isArray(votes) ? votes : []),
+  );
   const [showCloseVoteModal, setShowCloseVoteModal] = useState(false);
   const [closing, setClosing] = useState<boolean>(false);
   const [selectedVoteSessionId, setSelectedVoteSessionId] = useState<
@@ -83,7 +108,7 @@ const VoteResultsScreen = () => {
         const res = await dispatch(
           userGetVoteSessions(conversationId),
         ).unwrap();
-        setVoteSessions(res);
+        setVoteSessions(normalizeVoteSessions(res));
       } catch (error) {
         console.error("Error fetching vote sessions:", error);
       }
@@ -99,7 +124,6 @@ const VoteResultsScreen = () => {
     )
       return;
     setVoteSessions((prev) => {
-      // Update or add votes by id
       const updated = [...prev];
       votes.forEach((vote) => {
         const idx = updated.findIndex((v) => v.id === vote.id);
@@ -109,7 +133,7 @@ const VoteResultsScreen = () => {
           updated.push(vote);
         }
       });
-      return updated;
+      return normalizeVoteSessions(updated);
     });
   }, [votes]);
 

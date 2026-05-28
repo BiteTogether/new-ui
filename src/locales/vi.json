@@ -193,5 +193,8 @@
 "people_checked_in_nearby": "bạn bè đã ghé thăm địa điểm này",
 "notification": "Thông báo",
 "notification_on": "Đã bật thông báo",
-"notification_off": "Đã tắt thông báo"
+"notification_off": "Đã tắt thông báo",
+"otp_expired": "OTP đã hết hạn. Vui lòng yêu cầu một mã mới.",
+"too_many_requests": "Quá nhiều yêu cầu. Vui lòng thử lại sau.",
+"something_went_wrong": "Đã xảy ra lỗi. Vui lòng thử lại."
 }
