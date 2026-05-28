@@ -193,5 +193,8 @@
 "people_checked_in_nearby": "friends visited this place",
 "notification": "Notification",
 "notification_on": "Notifications turned on",
-"notification_off": "Notifications turned off"
+"notification_off": "Notifications turned off",
+"otp_expired": "OTP has expired. Please request a new one.",
+"too_many_requests": "Too many requests. Please try again later.",
+"something_went_wrong": "Something went wrong. Please try again."
 }

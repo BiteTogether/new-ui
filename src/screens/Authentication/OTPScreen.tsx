@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import {
   onAuthStateChanged,
   signInWithPhoneNumber,
   getIdToken,
+  FirebaseAuthTypes,
 } from "@react-native-firebase/auth";
 import { validateInfo } from "../../services/api/userApi";
 import { useDispatch } from "react-redux";
@@ -25,6 +26,64 @@ import { AppDispatch } from "../../store";
 import { userLogin } from "../../store/auth/authActions";
 import Toast from "react-native-toast-message";
 import Loading from "../../components/Loading";
+
+type FirebaseOtpError = {
+  code?: string;
+  message?: string;
+};
+
+type ApiLikeError = {
+  response?: {
+    status?: number;
+    data?: {
+      message?: string;
+    };
+  };
+};
+
+const getOtpErrorToastKey = (error: unknown, fallbackKey: string) => {
+  const code = (error as FirebaseOtpError | null)?.code;
+  const message = (error as FirebaseOtpError | null)?.message;
+
+  if (String(code) === "18002" || message?.includes("18002")) {
+    console.error("FirebaseAuth 18002 ignored:", error);
+    return null;
+  }
+
+  switch (code) {
+    case "auth/code-expired":
+    case "auth/session-expired":
+    case "auth/invalid-verification-id":
+    case "auth/missing-verification-code":
+      return "otp_expired";
+    case "auth/invalid-verification-code":
+      return "invalid_otp";
+    case "auth/too-many-requests":
+      return "too_many_requests";
+    case "auth/network-request-failed":
+      return "network_error";
+    default:
+      return fallbackKey;
+  }
+};
+
+const getApiErrorToastKey = (error: unknown, fallbackKey: string) => {
+  const status = (error as ApiLikeError | null)?.response?.status;
+
+  if (status === 401 || status === 403 || status === 404 || status === 422) {
+    return "error_occurred";
+  }
+
+  if (status === 429) {
+    return "too_many_requests";
+  }
+
+  if (status && status >= 500) {
+    return "something_went_wrong";
+  }
+
+  return fallbackKey;
+};
 
 const OTPScreen = () => {
   const { t } = useTranslation();
@@ -36,20 +95,63 @@ const OTPScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
+  const processedUserIdRef = useRef<string | null>(null);
 
   // If null, no SMS has been sent
-  const [confirm, setConfirm] = useState<any>(null);
+  const [confirm, setConfirm] =
+    useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
 
   // verification code (OTP - One-Time-Passcode)
   const [code, setCode] = useState("");
 
   // Handle login
-  function handleAuthStateChanged(user: any) {
+  async function handleAuthenticatedUser(
+    user: FirebaseAuthTypes.User,
+    idToken?: string,
+  ) {
+    if (!user?.uid) return;
+    if (processedUserIdRef.current === user.uid) return;
+
+    processedUserIdRef.current = user.uid;
+    setIsLoading(true);
+
+    try {
+      const token = idToken ?? (await getIdToken(user));
+      const res = await validateInfo({
+        criteriaType: "PHONE",
+        criteriaValue: phoneNumber,
+      });
+
+      if (res.status === 200 && res.data?.valid) {
+        navigation.navigate("Register", { idToken: token });
+      } else if (res.status === 200 && !res.data?.valid) {
+        await dispatch(userLogin({ idToken: token })).unwrap();
+      } else {
+        processedUserIdRef.current = null;
+        throw new Error("Unexpected validation response");
+      }
+    } catch (error) {
+      processedUserIdRef.current = null;
+      const toastKey = getApiErrorToastKey(error, "something_went_wrong");
+      if (toastKey) {
+        Toast.show({
+          type: "error",
+          text1: t(toastKey),
+        });
+      }
+      console.error("Error validating: ", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function handleAuthStateChanged(user: FirebaseAuthTypes.User | null) {
     if (user) {
       // Some Android devices can automatically process the verification code (OTP) message, and the user would NOT need to enter the code.
       // Actually, if he/she tries to enter it, he/she will get an error message because the code was already used in the background.
       // In this function, make sure you hide the component(s) for entering the code and/or navigate away from this screen.
       // It is also recommended to display a message to the user informing him/her that he/she has successfully logged in.
+      void handleAuthenticatedUser(user);
     }
   }
 
@@ -79,20 +181,34 @@ const OTPScreen = () => {
       const confirmation = await signInWithPhoneNumber(getAuth(), phoneNumber);
       setConfirm(confirmation);
     } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: t("otp_send_failed"),
-      });
+      const toastKey = getOtpErrorToastKey(error, "otp_send_failed");
+      if (toastKey) {
+        Toast.show({
+          type: "error",
+          text1: t(toastKey),
+        });
+      }
       setError(error as Error);
       console.error("Error sending OTP: ", error);
     }
   }
 
-  async function confirmCode() {
+  async function confirmCode(): Promise<FirebaseAuthTypes.UserCredential | null> {
+    if (!confirm) {
+      throw new Error("Confirmation result not ready");
+    }
+
     try {
       const res = await confirm.confirm(code);
       return res;
     } catch (error) {
+      const toastKey = getOtpErrorToastKey(error, "something_went_wrong");
+      if (toastKey) {
+        Toast.show({
+          type: "error",
+          text1: t(toastKey),
+        });
+      }
       console.error("Error confirming OTP: ", error);
       throw error;
     }
@@ -109,26 +225,24 @@ const OTPScreen = () => {
 
   const handleGoNext = async () => {
     try {
-      setIsLoading(true);
       const confirmation = await confirmCode();
-      const idToken = await getIdToken(confirmation.user);
-      const res = await validateInfo({
-        criteriaType: "PHONE",
-        criteriaValue: phoneNumber,
-      });
-      if (res.status === 200 && res.data?.valid) {
-        navigation.navigate("Register", { idToken });
-      } else if (res.status === 200 && !res.data?.valid) {
-        await dispatch(userLogin({ idToken: idToken })).unwrap();
+      if (!confirmation?.user) {
+        throw new Error("User credential not available");
       }
+
+      await handleAuthenticatedUser(
+        confirmation.user,
+        await getIdToken(confirmation.user),
+      );
     } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: t("invalid_otp"),
-      });
+      const toastKey = getApiErrorToastKey(error, "something_went_wrong");
+      if (toastKey) {
+        Toast.show({
+          type: "error",
+          text1: t(toastKey),
+        });
+      }
       console.error("Error validating: ", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
