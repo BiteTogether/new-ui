@@ -1,6 +1,10 @@
 import React, { useEffect, useRef } from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  useNavigationContainerRef,
+} from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { AppState } from "react-native";
 
 // Screens
 import LoginScreen from "../screens/Authentication/LoginScreen";
@@ -21,7 +25,7 @@ import CreatePostScreen from "../screens/Feed/CreatePostScreen";
 import VoteResultsScreen from "../screens/Chat/VoteResultsScreen";
 import BillResultsScreen from "../screens/Chat/BillResultsScreen";
 
-// Store
+// Redux
 import { useSelector, useDispatch } from "react-redux";
 import { loadToken } from "../store/auth/authSlice";
 import { userGetInfo } from "../store/user/userActions";
@@ -38,8 +42,21 @@ import Loading from "../components/Loading";
 import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
-import { AppState } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// Firebase
+import { getApp } from "@react-native-firebase/app";
+import { getAnalytics, logEvent } from "@react-native-firebase/analytics";
+import {
+  getCrashlytics,
+  log,
+  recordError,
+  setUserId,
+} from "@react-native-firebase/crashlytics";
+
+const app = getApp();
+const analyticsInstance = getAnalytics(app);
+const crashlyticsInstance = getCrashlytics(app);
 
 const Stack = createNativeStackNavigator();
 
@@ -48,54 +65,31 @@ export default function Navigation() {
   const { isSignedIn, loadingToken, token } = useSelector(
     (state: RootState) => state.auth,
   );
+  const { userInfo } = useSelector((state: RootState) => state.user);
   const { t, i18n } = useTranslation();
 
-  // ===== Presence refs =====
+  const navigationRef = useNavigationContainerRef();
+  const routeNameRef = useRef<string | undefined>();
+
+  const appStateRef = useRef(AppState.currentState);
+  const isConnectedRef = useRef(true);
   const currentStateRef = useRef<
     "FOREGROUND" | "BACKGROUND" | "OFFLINE" | null
   >(null);
-  const appStateRef = useRef(AppState.currentState);
-  const isConnectedRef = useRef(true);
 
-  // ===== Safe API =====
-  const safeUpdateUserState = async (
-    newState: "FOREGROUND" | "BACKGROUND" | "OFFLINE",
-  ) => {
-    if (currentStateRef.current === newState) return;
-
-    currentStateRef.current = newState;
-
-    try {
-      await updateUserState(newState);
-    } catch (err) {
-      console.error("updateUserState error", err);
-    }
-  };
-
-  // ===== Combine logic =====
-  const updatePresence = () => {
-    if (!isConnectedRef.current) {
-      safeUpdateUserState("OFFLINE");
-    } else if (appStateRef.current === "active") {
-      safeUpdateUserState("FOREGROUND");
-    } else {
-      safeUpdateUserState("BACKGROUND");
-    }
-  };
-
-  // ===== Load language =====
+  // Language
   useEffect(() => {
     AsyncStorage.getItem("appLanguage").then((lang) => {
       if (lang) i18n.changeLanguage(lang);
     });
   }, []);
 
-  // ===== Load token =====
+  // Token
   useEffect(() => {
     dispatch(loadToken());
   }, []);
 
-  // ===== Get user info =====
+  // User info
   useEffect(() => {
     if (isSignedIn) {
       dispatch(userGetInfo()).then((res) => {
@@ -109,35 +103,63 @@ export default function Navigation() {
     }
   }, [isSignedIn]);
 
-  // ===== Logout handler =====
+  // Logout handler
   useEffect(() => {
     ApiService.setLogoutHandler(() => {
       dispatch(userLogout());
     });
   }, []);
 
-  // ===== Presence system =====
+  // Presence update
+  const safeUpdateUserState = async (
+    newState: "FOREGROUND" | "BACKGROUND" | "OFFLINE",
+  ) => {
+    if (currentStateRef.current === newState) return;
+
+    currentStateRef.current = newState;
+
+    try {
+      await updateUserState(newState);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      recordError(crashlyticsInstance, error);
+    }
+  };
+
+  const updatePresence = () => {
+    if (!isConnectedRef.current) {
+      safeUpdateUserState("OFFLINE");
+    } else if (appStateRef.current === "active") {
+      safeUpdateUserState("FOREGROUND");
+    } else {
+      safeUpdateUserState("BACKGROUND");
+    }
+  };
+
+  // WebSocket + presence
   useEffect(() => {
     if (!token) return;
 
-    // Initial state
     websocketService.connect(token);
+    currentStateRef.current = null;
     safeUpdateUserState("FOREGROUND");
 
-    // Network listener
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
-      isConnectedRef.current = !!state.isConnected;
+      const isConnected = !!state.isConnected;
 
-      if (state.isConnected) {
+      if (isConnected && !isConnectedRef.current) {
         websocketService.connect(token);
-      } else {
-        websocketService.disconnect();
       }
 
+      if (!isConnected && isConnectedRef.current) {
+        websocketService.disconnect();
+        log(crashlyticsInstance, "Network disconnected");
+      }
+
+      isConnectedRef.current = isConnected;
       updatePresence();
     });
 
-    // App state listener
     const appStateSubscription = AppState.addEventListener(
       "change",
       (nextAppState) => {
@@ -145,27 +167,66 @@ export default function Navigation() {
 
         if (nextAppState === "active") {
           websocketService.connect(token);
+          log(crashlyticsInstance, "App foreground");
         } else {
           websocketService.disconnect();
+          log(crashlyticsInstance, "App background");
         }
 
         updatePresence();
       },
     );
 
-    // Cleanup
     return () => {
       unsubscribeNetInfo();
       appStateSubscription.remove();
       websocketService.disconnect();
+
+      log(crashlyticsInstance, "Navigation cleanup");
       safeUpdateUserState("OFFLINE");
     };
   }, [token]);
 
+  // Crashlytics user
+  useEffect(() => {
+    if (isSignedIn && userInfo?.id) {
+      setUserId(crashlyticsInstance, String(userInfo.id));
+      log(crashlyticsInstance, "App started");
+    }
+  }, [isSignedIn]);
+
+  // Loading
   if (loadingToken) return <Loading />;
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={() => {
+        const route = navigationRef.getCurrentRoute();
+
+        if (route) {
+          routeNameRef.current = route.name;
+
+          logEvent(analyticsInstance, "screen_view", {
+            screen_name: route.name,
+            screen_class: route.name,
+          });
+        }
+      }}
+      onStateChange={() => {
+        const route = navigationRef.getCurrentRoute();
+        const name = route?.name;
+
+        if (!name || routeNameRef.current === name) return;
+
+        routeNameRef.current = name;
+
+        logEvent(analyticsInstance, "screen_view", {
+          screen_name: name,
+          screen_class: name,
+        });
+      }}
+    >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isSignedIn ? (
           <>
