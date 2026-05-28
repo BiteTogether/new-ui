@@ -7,6 +7,9 @@ import {
   TouchableOpacity,
   FlatList,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from "react-native";
 import { colors, fonts } from "../../utils/constants";
 import TopBar from "../../components/TopBar";
@@ -34,6 +37,21 @@ const CreateGroupChatScreen = () => {
   const [searchText, setSearchText] = useState<string>("");
   const dispatch = useDispatch<AppDispatch>();
   const { loading } = useSelector((state: RootState) => state.chat);
+
+  const [behaviour, setBehaviour] = useState<"height" | undefined>("height");
+  useEffect(() => {
+    const showListener = Keyboard.addListener("keyboardDidShow", () => {
+      setBehaviour("height");
+    });
+    const hideListener = Keyboard.addListener("keyboardDidHide", () => {
+      setBehaviour(undefined);
+    });
+
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, []);
 
   const handleLoadMore = async () => {
     // Implement pagination if needed
@@ -94,137 +112,142 @@ const CreateGroupChatScreen = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <TopBar title={t("create_group_chat")} type="other" />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : behaviour}
+      style={{ flex: 1 }}
+    >
+      <View style={styles.container}>
+        <TopBar title={t("create_group_chat")} type="other" />
 
-      <SearchBar
-        placeholder={t("search_by_name_or_username")}
-        setSearchResult={setSearchText}
-      />
+        <SearchBar
+          placeholder={t("search_by_name_or_username")}
+          setSearchResult={setSearchText}
+        />
 
-      <View>
+        <View>
+          <FlatList
+            data={
+              selectedMembers.length > 0
+                ? friendsList.filter((friend) =>
+                    selectedMembers.includes(friend.id),
+                  )
+                : []
+            }
+            keyExtractor={(item) => item.id.toString()}
+            showsHorizontalScrollIndicator={false}
+            horizontal
+            renderItem={({ item }) => (
+              <Pressable
+                style={[styles.select_container, { padding: 8 }]}
+                onPress={() => handleSelectMember(item.id)}
+              >
+                <View
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <Avatar uri={item.avatar} />
+                  <View style={styles.username_container}>
+                    <Text style={styles.fullName_text}>
+                      {truncateText(item.fullName, 8)}
+                    </Text>
+                  </View>
+                  <View style={styles.x_button}>
+                    <Feather name="x" size={12} color={colors.text} />
+                  </View>
+                </View>
+              </Pressable>
+            )}
+          />
+        </View>
+
         <FlatList
-          data={
-            selectedMembers.length > 0
-              ? friendsList.filter((friend) =>
-                  selectedMembers.includes(friend.id),
-                )
-              : []
-          }
+          data={friendsList.filter(
+            (friend) =>
+              friend.fullName
+                ?.toLowerCase()
+                .includes(searchText.toLowerCase().trim()) ||
+              friend.username
+                ?.toLowerCase()
+                .includes(searchText.toLowerCase().trim()),
+          )}
           keyExtractor={(item) => item.id.toString()}
-          showsHorizontalScrollIndicator={false}
-          horizontal
+          showsVerticalScrollIndicator={false}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.1}
+          ListHeaderComponent={
+            <Text style={styles.title}>
+              {t("select_members")} ({selectedMembers.length})
+            </Text>
+          }
           renderItem={({ item }) => (
             <Pressable
-              style={[styles.select_container, { padding: 8 }]}
+              style={styles.select_container}
               onPress={() => handleSelectMember(item.id)}
             >
-              <View
-                style={{
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
+              <View style={styles.user_container}>
                 <Avatar uri={item.avatar} />
                 <View style={styles.username_container}>
                   <Text style={styles.fullName_text}>
-                    {truncateText(item.fullName, 8)}
+                    {truncateText(item.fullName, 20)}
                   </Text>
+                  <Text style={styles.username_text}>{item.username}</Text>
                 </View>
-                <View style={styles.x_button}>
-                  <Feather name="x" size={12} color={colors.text} />
-                </View>
+              </View>
+
+              <View
+                style={[
+                  styles.circle_button,
+                  {
+                    backgroundColor: selectedMembers.includes(item.id)
+                      ? colors.primary
+                      : colors.background,
+                    borderWidth: selectedMembers.includes(item.id) ? 0 : 1,
+                  },
+                ]}
+              >
+                {selectedMembers.includes(item.id) && (
+                  <Feather name="check" size={16} />
+                )}
               </View>
             </Pressable>
           )}
+          ListEmptyComponent={
+            <Text style={styles.no_result_text}>{t("no_friends")}</Text>
+          }
         />
-      </View>
 
-      <FlatList
-        data={friendsList.filter(
-          (friend) =>
-            friend.fullName
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase().trim()) ||
-            friend.username
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase().trim()),
-        )}
-        keyExtractor={(item) => item.id.toString()}
-        showsVerticalScrollIndicator={false}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.1}
-        ListHeaderComponent={
-          <Text style={styles.title}>
-            {t("select_members")} ({selectedMembers.length})
-          </Text>
-        }
-        renderItem={({ item }) => (
-          <Pressable
-            style={styles.select_container}
-            onPress={() => handleSelectMember(item.id)}
+        <View style={{ marginBottom: 16 }}>
+          <Text
+            style={{ fontWeight: "bold", marginBottom: 6, color: colors.text }}
           >
-            <View style={styles.user_container}>
-              <Avatar uri={item.avatar} />
-              <View style={styles.username_container}>
-                <Text style={styles.fullName_text}>
-                  {truncateText(item.fullName, 20)}
-                </Text>
-                <Text style={styles.username_text}>{item.username}</Text>
-              </View>
-            </View>
+            {t("group_name")}
+          </Text>
+          <TextInput
+            placeholder={t("enter_group_name")}
+            placeholderTextColor={colors.secondary}
+            value={groupName}
+            onChangeText={setGroupName}
+            style={styles.input}
+          />
+        </View>
 
-            <View
-              style={[
-                styles.circle_button,
-                {
-                  backgroundColor: selectedMembers.includes(item.id)
-                    ? colors.primary
-                    : colors.background,
-                  borderWidth: selectedMembers.includes(item.id) ? 0 : 1,
-                },
-              ]}
-            >
-              {selectedMembers.includes(item.id) && (
-                <Feather name="check" size={16} />
-              )}
-            </View>
-          </Pressable>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.no_result_text}>{t("no_friends")}</Text>
-        }
-      />
-
-      <View style={{ marginBottom: 16 }}>
-        <Text
-          style={{ fontWeight: "bold", marginBottom: 6, color: colors.text }}
+        <TouchableOpacity
+          style={[
+            styles.button_container,
+            {
+              opacity: loading ? 0.6 : 1,
+            },
+          ]}
+          onPress={handleCreateGroup}
+          disabled={loading}
         >
-          {t("group_name")}
-        </Text>
-        <TextInput
-          placeholder={t("enter_group_name")}
-          placeholderTextColor={colors.secondary}
-          value={groupName}
-          onChangeText={setGroupName}
-          style={styles.input}
-        />
+          <Text style={styles.button_text}>{t("create")}</Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity
-        style={[
-          styles.button_container,
-          {
-            opacity: loading ? 0.6 : 1,
-          },
-        ]}
-        onPress={handleCreateGroup}
-        disabled={loading}
-      >
-        <Text style={styles.button_text}>{t("create")}</Text>
-      </TouchableOpacity>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
