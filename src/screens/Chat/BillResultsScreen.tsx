@@ -37,6 +37,29 @@ type BillMember = {
   avatarUrl: string | null;
 };
 
+const normalizeBillSessions = (sessions: BillList): BillList => {
+  const seenIds = new Set<string>();
+
+  return sessions
+    .filter((session) => {
+      if (!session || !session.id) return false;
+      if (seenIds.has(session.id)) return false;
+
+      seenIds.add(session.id);
+      return true;
+    })
+    .sort((a, b) => {
+      if (a.status !== b.status) {
+        return a.status === "DRAFT" ? -1 : 1;
+      }
+
+      return (
+        new Date(b.createdAt ?? 0).getTime() -
+        new Date(a.createdAt ?? 0).getTime()
+      );
+    });
+};
+
 const BillResultsScreen = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
@@ -47,7 +70,9 @@ const BillResultsScreen = () => {
   const route = useRoute<RouteProp<MainStackParamList, "BillResults">>();
   const { conversationId } = route.params;
 
-  const [billSessions, setBillSessions] = useState<BillList>(bills);
+  const [billSessions, setBillSessions] = useState<BillList>(
+    normalizeBillSessions(Array.isArray(bills) ? bills : []),
+  );
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const conversation = conversations?.conversations?.find(
@@ -121,7 +146,7 @@ const BillResultsScreen = () => {
         const res = await dispatch(
           userGetBillSessions(conversationId),
         ).unwrap();
-        setBillSessions(res);
+        setBillSessions(normalizeBillSessions(res));
       } catch (error) {
         console.error("Error fetching bill sessions:", error);
       }
@@ -148,7 +173,7 @@ const BillResultsScreen = () => {
           updated.push(bill);
         }
       });
-      return updated;
+      return normalizeBillSessions(updated);
     });
   }, [bills, conversationId]);
 

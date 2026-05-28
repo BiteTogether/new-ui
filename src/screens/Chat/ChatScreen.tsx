@@ -56,6 +56,52 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import SharingLocationStickyBar from "./components/SharingLocationStickyBar";
 import { LOCATION_KEY } from "../../utils/key";
 
+const dedupeMessagesById = (messages: Message[]): Message[] => {
+  const seenIds = new Set<string>();
+
+  return messages.filter((msg) => {
+    if (!msg || !msg.id) return false;
+    if (seenIds.has(msg.id)) return false;
+
+    seenIds.add(msg.id);
+    return true;
+  });
+};
+
+const normalizeMessages = (messages: Message[]): Message[] => {
+  return dedupeMessagesById(messages).sort((a, b) => {
+    if (typeof a.seq === "number" && typeof b.seq === "number") {
+      return b.seq - a.seq;
+    }
+
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+};
+
+const normalizeVoteSessions = (sessions: VoteList): VoteList => {
+  const seenIds = new Set<string>();
+
+  return sessions.filter((session) => {
+    if (!session || !session.id) return false;
+    if (seenIds.has(session.id)) return false;
+
+    seenIds.add(session.id);
+    return true;
+  });
+};
+
+const normalizeBillSessions = (sessions: BillList): BillList => {
+  const seenIds = new Set<string>();
+
+  return sessions.filter((session) => {
+    if (!session || !session.id) return false;
+    if (seenIds.has(session.id)) return false;
+
+    seenIds.add(session.id);
+    return true;
+  });
+};
+
 const ChatScreen = () => {
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
   const { t } = useTranslation();
@@ -75,10 +121,10 @@ const ChatScreen = () => {
     (state: RootState) => state.user,
   );
   const [messagesList, setMessagesList] = useState<MessagesList>({
-    messages: messages,
+    messages: normalizeMessages(Array.isArray(messages) ? messages : []),
     nextCursor: 0,
     hasMore: false,
-    size: messages.length,
+    size: Array.isArray(messages) ? messages.length : 0,
   });
   const { loading } = useSelector((state: RootState) => state.chat);
   const [showSelectModal, setShowSelectModal] = useState<boolean>(false);
@@ -92,8 +138,12 @@ const ChatScreen = () => {
     useState<boolean>(false);
   const [showCreateBillModal, setShowCreateBillModal] =
     useState<boolean>(false);
-  const [voteSessions, setVoteSessions] = useState<VoteList>(votes);
-  const [billSessions, setBillSessions] = useState<BillList>(bills);
+  const [voteSessions, setVoteSessions] = useState<VoteList>(
+    normalizeVoteSessions(Array.isArray(votes) ? votes : []),
+  );
+  const [billSessions, setBillSessions] = useState<BillList>(
+    normalizeBillSessions(Array.isArray(bills) ? bills : []),
+  );
   const [selectedPollId, setSelectedPollId] = useState<string | null>(null);
   const [selectedBillId, setSelectedBillId] = useState<string | null>(null);
 
@@ -290,7 +340,7 @@ const ChatScreen = () => {
 
       await AsyncStorage.setItem(LOCATION_KEY, JSON.stringify(list));
     } catch (err) {
-      console.log("Save sharing error:", err);
+      console.error("Save sharing error:", err);
     }
   };
 
@@ -302,7 +352,7 @@ const ChatScreen = () => {
       const newList = list.filter((item: any) => item.conversationId !== conId);
       await AsyncStorage.setItem(LOCATION_KEY, JSON.stringify(newList));
     } catch (err) {
-      console.log("Remove sharing error:", err);
+      console.error("Remove sharing error:", err);
     }
   };
 
@@ -448,14 +498,14 @@ const ChatScreen = () => {
         if (messagesList.nextCursor !== res.nextCursor) {
           setMessagesList((prev) => ({
             ...res,
-            messages: [
+            messages: normalizeMessages([
               ...(Array.isArray(prev.messages)
                 ? prev.messages.filter(Boolean)
                 : []),
               ...(Array.isArray(res.messages)
                 ? res.messages.filter(Boolean)
                 : []),
-            ],
+            ]),
           }));
         }
       } catch (error) {
@@ -503,7 +553,7 @@ const ChatScreen = () => {
 
         setMessagesList((prev) => ({
           ...res,
-          messages: [
+          messages: normalizeMessages([
             ...(Array.isArray(prev.messages)
               ? prev.messages.filter(Boolean)
               : []
@@ -516,7 +566,7 @@ const ChatScreen = () => {
             ...(Array.isArray(res.messages)
               ? res.messages.filter(Boolean)
               : []),
-          ],
+          ]),
         }));
       } catch (error) {
         console.error("Error fetching messages:", error);
@@ -531,7 +581,7 @@ const ChatScreen = () => {
       if (!conId) return;
       try {
         const res = await dispatch(userGetVoteSessions(conId)).unwrap();
-        setVoteSessions(res);
+        setVoteSessions(normalizeVoteSessions(res));
       } catch (error) {
         console.error("Error fetching vote sessions:", error);
       }
@@ -541,7 +591,7 @@ const ChatScreen = () => {
       if (!conId) return;
       try {
         const res = await dispatch(userGetBillSessions(conId)).unwrap();
-        setBillSessions(res);
+        setBillSessions(normalizeBillSessions(res));
       } catch (error) {
         console.error("Error fetching bill sessions:", error);
       }
@@ -570,7 +620,7 @@ const ChatScreen = () => {
       return;
     setMessagesList((prev) => ({
       ...prev,
-      messages: [
+      messages: normalizeMessages([
         ...(Array.isArray(messages) ? messages.filter(Boolean) : []).filter(
           (msg) =>
             msg &&
@@ -578,7 +628,7 @@ const ChatScreen = () => {
             prev.messages.filter(Boolean).every((m) => m && m.id !== msg.id),
         ),
         ...(Array.isArray(prev.messages) ? prev.messages.filter(Boolean) : []),
-      ],
+      ]),
     }));
   }, [messages]);
 
@@ -589,7 +639,6 @@ const ChatScreen = () => {
     )
       return;
     setVoteSessions((prev) => {
-      // Update or add votes by id
       const updated = [...prev];
       votes.forEach((vote) => {
         const idx = updated.findIndex((v) => v.id === vote.id);
@@ -599,7 +648,7 @@ const ChatScreen = () => {
           updated.push(vote);
         }
       });
-      return updated;
+      return normalizeVoteSessions(updated);
     });
   }, [votes]);
 
@@ -610,7 +659,6 @@ const ChatScreen = () => {
     )
       return;
     setBillSessions((prev) => {
-      // Update or add bills by id
       const updated = [...prev];
       bills.forEach((bill) => {
         const idx = updated.findIndex((b) => b.id === bill.id);
@@ -620,7 +668,7 @@ const ChatScreen = () => {
           updated.push(bill);
         }
       });
-      return updated;
+      return normalizeBillSessions(updated);
     });
   }, [bills]);
 

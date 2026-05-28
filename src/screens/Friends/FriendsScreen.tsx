@@ -337,7 +337,7 @@ const FriendsScreen = () => {
           data={friendRequests}
           keyExtractor={(item) => item.id.toString()}
           showsVerticalScrollIndicator={false}
-          scrollEnabled={false}
+          // scrollEnabled={false}
           ListHeaderComponent={
             <Text style={styles.subtitle}>
               {t("friend_requests")} ({friendRequestsCount})
@@ -377,7 +377,7 @@ const FriendsScreen = () => {
           data={friendsList}
           keyExtractor={(item) => item.id.toString()}
           showsVerticalScrollIndicator={false}
-          scrollEnabled={false}
+          // scrollEnabled={false}
           ListHeaderComponent={
             <Text style={styles.subtitle}>
               {t("friends_list")} ({friendsListCount})
