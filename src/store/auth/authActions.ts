@@ -9,6 +9,7 @@ import {
 import { LoginRequest, RegisterRequest } from "../../types/auth";
 import { getFcmToken, deleteFcmToken } from "../../utils/secureStore";
 import { updateDeviceToken } from "../../services/api/notiApi";
+import { getAuth } from "@react-native-firebase/auth";
 
 export const userLogin = createAsyncThunk(
   "auth/login",
@@ -81,6 +82,7 @@ export const userLogout = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await logout();
+      await getAuth().signOut();
       // Always clear tokens, even if API fails
       await deleteToken();
       await deleteRefreshToken();
@@ -89,6 +91,11 @@ export const userLogout = createAsyncThunk(
       }
       return rejectWithValue(response.message);
     } catch (error: any) {
+      try {
+        await getAuth().signOut();
+      } catch (signOutError) {
+        console.error("Error signing out Firebase Auth:", signOutError);
+      }
       // Always clear tokens, even if API fails
       await deleteToken();
       await deleteRefreshToken();
